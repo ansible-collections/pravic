@@ -1,7 +1,7 @@
 - hosts: localhost
   gather_facts: no
   collections:
-  - cloud.pravic
+  - pravic.pravic
   environment:
     AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
     AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
@@ -11,7 +11,7 @@
   tasks:
   - block:
       - name: Create S3 bucket - check_mode=True
-        cloud.pravic.resources:
+        pravic.pravic.resources:
           state: "present"
           resources:
             pravic_s3_bucket_1:
@@ -31,7 +31,7 @@
           - _result.resources.pravic_s3_bucket_1.msg == "Created"
 
       - name: Create S3 bucket
-        cloud.pravic.resources:
+        pravic.pravic.resources:
           state: "present"
           resources:
             pravic_s3_bucket_1:
@@ -48,7 +48,7 @@
           - _result is successful
 
       - name: Update S3 bucket - check_mode=True
-        cloud.pravic.resources:
+        pravic.pravic.resources:
           state: "present"
           resources:
             pravic_s3_bucket_1:
@@ -66,7 +66,7 @@
           - _result.resources.pravic_s3_bucket_1.msg == "Updated"
 
       - name: Delete S3 bucket - check_mode=True
-        cloud.pravic.resources:
+        pravic.pravic.resources:
           state: "absent"
           resources:
             pravic_s3_bucket_1:
@@ -83,7 +83,7 @@
           - _result.resources.pravic_s3_bucket_1.msg == "Deleted"
 
       - name: Delete S3 bucket
-        cloud.pravic.resources:
+        pravic.pravic.resources:
           state: "absent"
           resources:
             pravic_s3_bucket_1:
@@ -97,7 +97,7 @@
           - _result is successful
       
       - name: Create a bunch of S3 buckets with interdependency - check_mode=True
-        cloud.pravic.resources:
+        pravic.pravic.resources:
           state: "present"
           resources:
             pravic_s3_bucket_2:
@@ -120,7 +120,7 @@
 
     always:
       - name: Delete S3 bucket
-        cloud.pravic.resources:
+        pravic.pravic.resources:
           state: "absent"
           resources:
             pravic_s3_bucket_1:

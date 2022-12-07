@@ -11,7 +11,7 @@ from unittest import mock
 import pytest
 
 
-from ansible_collections.cloud.pravic.plugins.module_utils.aws.client import (
+from ansible_collections.pravic.pravic.plugins.module_utils.aws.client import (
     AwsClient,
     Discoverer,
     Resource,

@@ -46,7 +46,7 @@ requirements:
 EXAMPLES = r"""
 # create Amazon IAM Role
 - name: Create Amazon IAM Role
-  cloud.pravic.resources:
+  pravic.pravic.resources:
     state: present
     resources:
         role_1:
@@ -64,7 +64,7 @@ EXAMPLES = r"""
               Service: s3.amazonaws.com
 # Delete Amazon EC2 key pair
 - name: Delete Amazon EC2 key pair
-  cloud.pravic.resources:
+  pravic.pravic.resources:
     state: absent
     resources:
       key_1:
@@ -86,7 +86,7 @@ resources:
 
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.cloud.pravic.plugins.module_utils.aws.client import AwsClient
+from ansible_collections.pravic.pravic.plugins.module_utils.aws.client import AwsClient
 
 
 ARG_SPEC = {
