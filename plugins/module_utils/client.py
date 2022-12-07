@@ -17,7 +17,7 @@ def op(operation: str, path: str, value: str) -> Dict:
 
 
 class Resource:
-    def __init__(self, resource: Dict, resource_type: 'ResourceType') -> None:
+    def __init__(self, resource: Dict, resource_type: "ResourceType") -> None:
         self.resource_type = resource_type
         self._resource = resource
 
@@ -108,17 +108,11 @@ class AwsClient:
         return result.resource
 
     def _get_resource(self, resource: Resource) -> Resource:
-        result = self.client.get_resource(
-            TypeName=resource.type_name, Identifier=resource.identifier
-        )
-        return resource.resource_type.make(
-            json.loads(result["ResourceDescription"]["Properties"])
-        )
+        result = self.client.get_resource(TypeName=resource.type_name, Identifier=resource.identifier)
+        return resource.resource_type.make(json.loads(result["ResourceDescription"]["Properties"]))
 
     def _create(self, resource: Resource) -> Resource:
-        result = self.client.create_resource(
-            TypeName=resource.type_name, DesiredState=json.dumps(resource.properties)
-        )
+        result = self.client.create_resource(TypeName=resource.type_name, DesiredState=json.dumps(resource.properties))
         try:
             self._wait(result["ProgressEvent"]["RequestToken"])
         except botocore.exceptions.WaiterError as e:
@@ -127,7 +121,7 @@ class AwsClient:
 
     def _update(self, existing: Resource, desired: Resource) -> Resource:
         patch = JsonPatch()
-        filtered = {k: v for k,v in desired.properties.items() if k not in desired.read_only_properties}
+        filtered = {k: v for k, v in desired.properties.items() if k not in desired.read_only_properties}
         for k, v in filtered.items():
             if k not in existing.properties:
                 patch.append(op("add", k, v))
@@ -143,9 +137,7 @@ class AwsClient:
         return self._get_resource(desired)
 
     def _delete(self, resource: Resource) -> Resource:
-        result = self.client.delete_resource(
-            TypeName=resource.type_name, Identifier=resource.identifier
-        )
+        result = self.client.delete_resource(TypeName=resource.type_name, Identifier=resource.identifier)
         self._wait(result["ProgressEvent"]["RequestToken"])
         return resource
 
