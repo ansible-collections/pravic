@@ -1,23 +1,11 @@
-# See https://docs.ansible.com/ansible/latest/dev_guide/collections_galaxy_meta.html
-
-namespace: community
-name: FIXME
-version: 0.1.0
+namespace: cloud
+name: pravic
+version: 0.0.1
 readme: README.md
+description: An experimental project intended to explore how Ansible could be used to manage cloud-based resources in a more declarative way.
 authors:
-  - YOUR NAME (github.com/YOURGITHUB)
-description: null
+  - Ansible (https://github.com/ansible)
 license_file: LICENSE
-tags:
-# tags so people can search for collections https://galaxy.ansible.com/search
-# tags are all lower-case, no spaces, no dashes.
-  - example1
-  - example2
-repository: https://github.com/ansible-collections/community.REPO_NAME
-#documentation: https://github.com/ansible-collection-migration/community.REPO_NAME/tree/main/docs
-homepage: https://github.com/ansible-collections/community.REPO_NAME
-issues: https://github.com/ansible-collections/community.REPO_NAME/issues
-build_ignore:
-# https://docs.ansible.com/ansible/devel/dev_guide/developing_collections_distributing.html#ignoring-files-and-folders
-  - .gitignore
-  - changelogs/.plugin-cache.yaml
+repository: https://github.com/ansible-collections/pravic
+homepage: https://github.com/ansible-collections/pravic
+issues: https://github.com/ansible-collections/pravic/issues
