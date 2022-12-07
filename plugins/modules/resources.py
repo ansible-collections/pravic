@@ -2,8 +2,8 @@
 
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.cloud.pravic.plugins.module_utils.client import AwsClient
-from ansible_collections.cloud.pravic.plugins.module_utils.resource import run
+from ansible_collections.pravic.pravic.plugins.module_utils.client import AwsClient
+from ansible_collections.pravic.pravic.plugins.module_utils.resource import run
 
 
 ARG_SPEC = {
