@@ -136,12 +136,8 @@ class AwsClient(CloudClient):
         return result
 
     def _get_resource(self, resource: Resource) -> Resource:
-        result = self.client.get_resource(
-            TypeName=resource.type_name, Identifier=resource.identifier
-        )
-        return resource.resource_type.make(
-            json.loads(result["ResourceDescription"]["Properties"])
-        )
+        result = self.client.get_resource(TypeName=resource.type_name, Identifier=resource.identifier)
+        return resource.resource_type.make(json.loads(result["ResourceDescription"]["Properties"]))
 
     @staticmethod
     def make_result(changed: bool, result: Resource, msg: str) -> Dict:

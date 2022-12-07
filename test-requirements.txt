@@ -4,3 +4,4 @@ pytest
 pytest-forked
 pytest-xdist
 pytest-mock
+coverage
