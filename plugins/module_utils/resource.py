@@ -39,9 +39,7 @@ def run(desired_state, current_state, client, state):
     sorter = TopologicalSorter()
     for name, resource in desired_state.items():
         if state == "present":
-            sorter.add(
-                name, *map(operator.itemgetter(1), REREG.findall(yaml.dump(resource)))
-            )
+            sorter.add(name, *map(operator.itemgetter(1), REREG.findall(yaml.dump(resource))))
         elif state == "absent":
             sorter.add(name)
             for item in map(operator.itemgetter(1), REREG.findall(yaml.dump(resource))):
