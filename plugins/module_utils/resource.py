@@ -65,7 +65,7 @@ class ResourceExceptionError(Exception):
 
 class CloudClient(metaclass=ABCMeta):
     def __init__(self, **kwargs: Any) -> None:
-        pass
+        self.check_mode = kwargs.get("check_mode", False)
 
     @abstractmethod
     def present(self, resource: Dict) -> Dict:
@@ -75,7 +75,7 @@ class CloudClient(metaclass=ABCMeta):
     def absent(self, resource: Dict) -> Dict:
         pass
 
-    def run(self, desired_state, current_state, state, check_mode):
+    def run(self, desired_state, current_state, state):
 
         if not HAS_PYYAML:
             raise ResourceExceptionError(
@@ -104,7 +104,7 @@ class CloudClient(metaclass=ABCMeta):
                 for name in sorter.get_ready():
                     if state == "present":
                         node = resolve_refs(
-                            desired_state[name], current_state, check_mode
+                            desired_state[name], current_state, self.check_mode
                         )
                         futures[executor.submit(self.present, node)] = name
                     elif state == "absent":
@@ -112,7 +112,7 @@ class CloudClient(metaclass=ABCMeta):
                             sorter.done(name)
                             continue
                         node = resolve_refs(
-                            desired_state[name], current_state, check_mode
+                            desired_state[name], current_state, self.check_mode
                         )
                         futures[executor.submit(self.absent, node)] = name
                 for future in concurrent.futures.as_completed(futures):

@@ -17,7 +17,7 @@ except ImportError:
     HAS_BOTO3 = False
 
 from ansible.module_utils.basic import missing_required_lib
-from ansible_collections.pravic.pravic.plugins.module_utils.resource import CloudClient
+from ansible_collections.cloud.pravic.plugins.module_utils.resource import CloudClient
 
 
 class JsonPatch(list):
@@ -99,18 +99,19 @@ class AwsBotocoreError(Exception):
     def __init__(self, exc, msg):
         self.exc = exc
         self.msg = msg
-        super().__init__(self)
+        super().__init__(self.msg)
 
 
 class AwsClient(CloudClient):
-    def __init__(self, check_mode=False, **kwargs) -> None:
+    def __init__(self, **kwargs) -> None:
 
         if not HAS_BOTO3:
             raise AwsBotocoreError(
                 msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR
             )
 
-        self.check_mode = check_mode
+        super(AwsClient, self).__init__(**kwargs)
+
         self.session = boto3.session.Session(**kwargs)
         self.resources = Discoverer(self.session)
         self.client = self.session.client("cloudcontrol")
