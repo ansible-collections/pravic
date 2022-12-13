@@ -110,13 +110,13 @@ DOCUMENTATION = r"""
         aliases: [ k8s_verify_ssl ]
 """
 
-from ansible_collections.gravesm.eda.plugins.plugin_utils.connection import RBAConnectionBase
+from ansible_collections.cloud.pravic.plugins.plugin_utils.connection import RBAConnectionBase
 
 
 class Connection(RBAConnectionBase):
     """Local kubernetes connection plugin"""
 
-    TRANSPORT = "gravesm.eda.k8s"
+    TRANSPORT = "cloud.pravic.k8s"
 
     def documentation(self):
         return DOCUMENTATION

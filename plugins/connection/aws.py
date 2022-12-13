@@ -49,13 +49,13 @@ DOCUMENTATION = r"""
           - name: AWS_CONFIG_PROFILE_NAME
 """
 
-from ansible_collections.gravesm.eda.plugins.plugin_utils.connection import RBAConnectionBase
+from ansible_collections.cloud.pravic.plugins.plugin_utils.connection import RBAConnectionBase
 
 
 class Connection(RBAConnectionBase):
     """Local Amazon connection plugin"""
 
-    TRANSPORT = "gravesm.eda.aws"
+    TRANSPORT = "cloud.pravic.aws"
 
     def documentation(self):
         return DOCUMENTATION

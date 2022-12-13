@@ -30,7 +30,7 @@
             virtualenv_command: "{{ ansible_python_interpreter }} -m virtualenv"
 
         - name: Deploy resources
-          gravesm.eda.resources:
+          cloud.pravic.resources:
             state: "{{ state | default('present') }}"
           vars:
             ansible_python_interpreter: "{{ pip_directory }}/virtualenv/bin/python"

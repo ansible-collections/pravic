@@ -2,9 +2,9 @@
 
 import os
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.gravesm.eda.plugins.module_utils.aws.client import AwsClient
-from ansible_collections.gravesm.eda.plugins.module_utils.k8s.client import K8sClient
-from ansible_collections.gravesm.eda.plugins.module_utils.resource import run
+from ansible_collections.cloud.pravic.plugins.module_utils.aws.client import AwsClient
+from ansible_collections.cloud.pravic.plugins.module_utils.k8s.client import K8sClient
+from ansible_collections.cloud.pravic.plugins.module_utils.resource import run
 
 
 ARG_SPEC = {
