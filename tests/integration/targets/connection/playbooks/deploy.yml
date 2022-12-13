@@ -3,6 +3,12 @@
   gather_facts: false
 
   tasks:
+    - include_vars: aws_resources.yml
+      when: '"aws" in group_names'
+
+    - include_vars: k8s_resources.yml
+      when: '"k8s" in group_names'
+
     - name: 'Ensure that we have virtualenv available to us'
       pip:
         name: virtualenv
@@ -19,12 +25,7 @@
 
         - name: Install required package into virtualenv
           pip:
-            name:
-              - botocore>=1.21.0
-              - boto3>=1.18.0
-              - kubernetes>=12.0.0
-              - requests-oauthlib
-              - jsonpatch
+            name: "{{ required_libs }}" 
             virtualenv: "{{ pip_directory }}/virtualenv"
             virtualenv_command: "{{ ansible_python_interpreter }} -m virtualenv"
 
