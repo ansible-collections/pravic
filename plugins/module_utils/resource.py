@@ -32,9 +32,10 @@ def resolve_refs(node, context):
         return resolved
     elif isinstance(node, list):
         return [resolve_refs(i, context) for i in node]
-    else:
+    elif isinstance(node, (str, bytes, bytearray)):
         replacer = functools.partial(replace_reference, context)
         return REREG.sub(replacer, node)
+    return node
 
 
 def resolve_dependencies(sorter, desired_state, state):

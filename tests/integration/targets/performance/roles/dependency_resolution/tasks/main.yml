@@ -1,0 +1,20 @@
+---
+- name: Generate resources definition
+  resources_definition:
+    resources_type: '{{ pravic_performance_provider | default("aws") }}'
+    number_resources: '{{ pravic_performance_nb_resources | default(10) }}'
+  register: result
+
+- set_fact:
+    resources: '{{ result.resources }}'
+
+- name: Deploy resources
+  cloud.pravic.resources:
+    state: present
+  environment:
+    PRAVIC_TIME_DEPENDENCY_RESOLUTION: "true"
+  register: _deploy
+
+- name: Display dependency resolution duration
+  debug:
+    msg: "Dependency Resolution duration: {{ result.duration.dependency_resolution }}ms"
