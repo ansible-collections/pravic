@@ -5,6 +5,8 @@ import re
 from graphlib import TopologicalSorter
 
 import yaml
+import time
+import os
 
 
 REREG = re.compile(r"resource:((\w+)\S+)")
@@ -35,8 +37,7 @@ def resolve_refs(node, context):
         return REREG.sub(replacer, node)
 
 
-def run(desired_state, current_state, client, state):
-    sorter = TopologicalSorter()
+def resolve_dependencies(sorter, desired_state, state):
     for name, resource in desired_state.items():
         if state == "present":
             sorter.add(
@@ -48,6 +49,22 @@ def run(desired_state, current_state, client, state):
                 sorter.add(item, name)
 
     sorter.prepare()
+
+
+def run(desired_state, current_state, client, state):
+
+    output = {}
+
+    start = time.time()
+    sorter = TopologicalSorter()
+    resolve_dependencies(sorter, desired_state, state)
+    end = time.time()
+
+    if os.environ.get("PRAVIC_TIME_DEPENDENCY_RESOLUTION", "").lower() in ("true", "yes", "1"):
+        output.update(
+            {"duration": {"dependency_resolution": (end - start) * 1000}}
+        )
+
     with concurrent.futures.ThreadPoolExecutor() as executor:
         while sorter:
             futures = {}
@@ -72,4 +89,5 @@ def run(desired_state, current_state, client, state):
                     except KeyError:
                         pass
                 sorter.done(name)
-    return current_state
+    output["resources"] = current_state
+    return output
