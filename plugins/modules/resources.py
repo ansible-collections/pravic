@@ -23,7 +23,7 @@ def main():
         client,
         module.params["state"],
     )
-    module.exit_json(changed=True, resources=result)
+    module.exit_json(changed=True, **result)
 
 
 if __name__ == "__main__":
