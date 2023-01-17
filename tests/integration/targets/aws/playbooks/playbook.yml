@@ -1,0 +1,130 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+  vars:
+    aws_domain_name: "{{ (aws_region == 'us-east-1') | ternary('ec2.internal', aws_region + '.compute.internal') }}"
+    vpc_cidr: 10.228.224.0/21
+    vpc_name: 'pravic-vpc-net'
+    dhcp_option_group_name: 'pravic-dhop'
+    subnet_a_name: 'pravic-net-a'
+    subnet_b_name: 'pravic-net-b'
+    subnet_c_name: 'pravic-net-c'
+    subnet_d_name: 'pravic-net-d'
+    internet_gateway_name: 'pravic-igw'
+    nat_gateway_name: 'pravic-natgw'
+    route_table_name: 'pravic-rt'
+    aws_region: us-east-1
+
+  tasks:
+  - set_fact:
+      resources:
+        vpc:
+          Type: AWS::EC2::VPC
+          Properties:
+            CidrBlock: '{{ vpc_cidr }}'
+            InstanceTenancy: default
+            Tags:
+              - Key: Name
+                Value: '{{ vpc_name }}'
+        
+        dhcp_option_group:
+          Type: AWS::EC2::DHCPOptions
+          Properties: 
+            DomainName: "{{ aws_domain_name }}"
+            DomainNameServers:
+              - AmazonProvidedDNS
+            Tags:
+              - Key: Name
+                Value: "{{ dhcp_option_group_name }}"
+        
+        dhcp_option_group_association:
+          Type: AWS::EC2::VPCDHCPOptionsAssociation
+          Properties:
+            DhcpOptionsId": resource:dhcp_option_group.Properties.DhcpOptionsId
+            VpcId: resource:vpc.Properties.VpcId
+        
+        associate_amazon_provided_ipv6_cidr_block:
+          Type: AWS::EC2::VPCCidrBlock
+          Properties:
+              AmazonProvidedIpv6CidrBlock: true
+              VpcId: resource:vpc.Properties.VpcId
+
+        subnet_a:
+          Type: AWS::EC2::Subnet
+          Properties:
+            AssignIpv6AddressOnCreation: false
+            AvailabilityZone: "{{ aws_region }}a"
+            CidrBlock: 10.228.224.0/24
+            VpcId: resource:vpc.Properties.VpcId
+            Tags:
+              - Key: Name
+                Value: "{{ subnet_a_name }}"
+        
+        subnet_b:
+          Type: AWS::EC2::Subnet
+          Properties:
+            AssignIpv6AddressOnCreation: false
+            AvailabilityZone: "{{ aws_region }}b"
+            CidrBlock: 10.228.225.0/24
+            VpcId: resource:vpc.Properties.VpcId
+            Tags:
+              - Key: Name
+                Value: "{{ subnet_b_name }}"
+        
+        subnet_c:
+          Type: AWS::EC2::Subnet
+          Properties:
+            AssignIpv6AddressOnCreation: false
+            AvailabilityZone: "{{ aws_region }}a"
+            CidrBlock: 10.228.226.0/24
+            VpcId: resource:vpc.Properties.VpcId
+            Tags:
+              - Key: Name
+                Value: "{{ subnet_b_name }}"
+        
+        subnet_d:
+          Type: AWS::EC2::Subnet
+          Properties:
+            AssignIpv6AddressOnCreation: false
+            AvailabilityZone: "{{ aws_region }}b"
+            CidrBlock: 10.228.227.0/24
+            VpcId: resource:vpc.Properties.VpcId
+            Tags:
+              - Key: Name
+                Value: "{{ subnet_b_name }}"
+        
+        internet_gateway:
+          Type: AWS::EC2::InternetGateway
+          Properties:
+            Tags:
+            - Key: Name
+              Value: "{{ internet_gateway_name }}"
+        
+        attach_gateway_to_vpc:
+          Type: AWS::EC2::VPCGatewayAttachment
+          Properties: 
+            InternetGatewayId: resource:internet_gateway.Properties.InternetGatewayId
+            VpcId: resource:vpc.Properties.VpcId
+
+        nat_gateway:
+          Type: AWS::EC2::NatGateway
+          Properties: 
+            SubnetId: resource:subnet_a.Properties.SubnetId
+            Tags: 
+              - Key: Name
+                Value: "{{ nat_gateway_name }}"
+        
+        route_table:
+          Type: AWS::EC2::RouteTable
+          Properties: 
+            Tags: 
+              - Key: Name
+                Value: "{{ route_table_name }}"
+            VpcId: resource:vpc.Properties.VpcId
+  - block:
+    - cloud.pravic.resources:
+        state: "{{ state | default('present') }}"
+    always:
+      - cloud.pravic.resources:
+          state: "{{ state | default('absent') }}"
