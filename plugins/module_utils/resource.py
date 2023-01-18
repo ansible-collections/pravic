@@ -3,8 +3,17 @@ import functools
 import operator
 import re
 from graphlib import TopologicalSorter
+import traceback
 
-import yaml
+PYYAML_IMP_ERR = None
+try:
+    import yaml
+    HAS_PYYAML = True
+except ImportError:
+    PYYAML_IMP_ERR = traceback.format_exc()
+    HAS_PYYAML = False
+
+from ansible.module_utils.basic import missing_required_lib
 
 
 REREG = re.compile(r"resource:((\w+)\S+)")
@@ -36,7 +45,21 @@ def resolve_refs(node, context):
     return node
 
 
+class ResourceExceptionError(Exception):
+    def __init__(self, exc, msg):
+        self.exc = exc
+        self.msg = msg
+        super().__init__(self)
+
+
 def run(desired_state, current_state, client, state):
+
+    if not HAS_PYYAML:
+        raise ResourceExceptionError(
+            msg=missing_required_lib('PyYAML'),
+            exc=PYYAML_IMP_ERR
+        )
+
     sorter = TopologicalSorter()
     for name, resource in desired_state.items():
         if state == "present":

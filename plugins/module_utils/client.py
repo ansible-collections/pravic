@@ -1,9 +1,18 @@
 import functools
 import json
 from typing import Any, Dict, List
+import traceback
 
-import boto3.session
-import botocore
+BOTO3_IMP_ERR = None
+try:
+    import boto3.session
+    import botocore
+    HAS_BOTO3 = True
+except ImportError:
+    BOTO3_IMP_ERR = traceback.format_exc()
+    HAS_BOTO3 = False
+
+from ansible.module_utils.basic import missing_required_lib
 
 
 class JsonPatch(list):
@@ -72,7 +81,7 @@ class Discoverer:
     def __init__(self, session: Any) -> None:
         self.client = session.client("cloudformation")
 
-    @functools.cache
+    @functools.cache  # pylint: disable=method-cache-max-size-none
     def get(self, type_name: str) -> ResourceType:
         try:
             result = self.client.describe_type(Type="RESOURCE", TypeName=type_name)
@@ -81,11 +90,24 @@ class Discoverer:
         return ResourceType(json.loads(result["Schema"]))
 
 
+class AwsBotocoreError(Exception):
+    def __init__(self, exc, msg):
+        self.exc = exc
+        self.msg = msg
+        super().__init__(self)
+
+
 class AwsClient:
     def __init__(self, **kwargs: Any) -> None:
         self.session = kwargs.pop("session")
         self.resources = kwargs.pop("resources")
         self.client = kwargs.pop("client")
+
+        if not HAS_BOTO3:
+            raise AwsBotocoreError(
+                msg=missing_required_lib('boto3 and botocore'),
+                exc=BOTO3_IMP_ERR
+            )
 
         if self.session is None:
             self.session = boto3.session.Session(**kwargs)
@@ -134,7 +156,7 @@ class AwsClient:
 
     def _update(self, existing: Resource, desired: Resource) -> Resource:
         patch = JsonPatch()
-        filtered = {k: v for k,v in desired.properties.items() if k not in desired.read_only_properties}
+        filtered = {k: v for k, v in desired.properties.items() if k not in desired.read_only_properties}
         for k, v in filtered.items():
             if k not in existing.properties:
                 patch.append(op("add", k, v))
