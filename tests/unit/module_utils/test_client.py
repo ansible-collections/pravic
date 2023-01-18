@@ -63,10 +63,11 @@ def aws_client():
     class NotFound(Exception):
         pass
 
-    resource = AwsClient()
-    resource.session = Mock()
-    resource.client = MagicMock()
-    resource.resources = Mock()
+    session = Mock()
+    client = MagicMock()
+    resources = Mock()
+
+    resource = AwsClient(session=session, client=client, resources=resources)
     resource.client.exceptions.ResourceNotFoundException = NotFound
     return resource
 

@@ -83,9 +83,16 @@ class Discoverer:
 
 class AwsClient:
     def __init__(self, **kwargs: Any) -> None:
-        self.session = boto3.session.Session(**kwargs)
-        self.resources = Discoverer(self.session)
-        self.client = self.session.client("cloudcontrol")
+        self.session = kwargs.pop("session")
+        self.resources = kwargs.pop("resources")
+        self.client = kwargs.pop("client")
+
+        if self.session is None:
+            self.session = boto3.session.Session(**kwargs)
+        if self.resources is None:
+            self.resources = Discoverer(self.session)
+        if self.client is None:
+            self.client = self.session.client("cloudcontrol")
 
     def present(self, resource: Dict) -> Dict:
         r_type = self.resources.get(resource["Type"])
