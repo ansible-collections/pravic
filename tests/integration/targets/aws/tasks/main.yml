@@ -1,0 +1,8 @@
+- ansible.builtin.include_vars: files/resources.yml
+
+- block:
+  - cloud.pravic.resources:
+      state: "{{ state | default('present') }}"
+  always:
+    - cloud.pravic.resources:
+        state: "{{ state | default('absent') }}"
