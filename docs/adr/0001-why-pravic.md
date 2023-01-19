@@ -93,13 +93,11 @@ In the above example, the VPC must be created before any other resources and the
 
 ### Asynchronous Execution
 
-Cloud deployments are often made up of a large number of resources.  Some resources will depend on each other, and others will not.  Common automation scenarios frequently experience long execution times as tasks are executed one at a time, and with each task needing to duplicate API authentication and connection management.  The async keyword and careful construction of roles and playbooks can help, provided the content creator can maintain a high degree of contextual awareness about which tasks can happen in what order.
+Cloud deployments are often made up of a large number of resources.  Some resources will depend on each other, and others will not.  Common automation scenarios frequently experience long execution times as tasks are executed one at a time, and with each task needing to duplicate API authentication and connection management.  While the async keyword and careful construction of roles and playbooks can help with de-serializing individual tasks, this does not address connection reuse and the content creator must maintain a high degree of contextual awareness about which tasks can happen in what order.
 
-With a declared set of resources and knowledge of the dependencies between resources, we should be able to programmatically split resource changes into a series of actions which must happen synchronously and those which can happen asynchronously, saving a significant amount of execution time.  We can also execute these activities in a shared connection or connection pool to reduce the overhead of spawning a new Python process and API connection for each task.
+We propose that with a declared set of resources and knowledge of the dependencies between resources, we should be able to programmatically split resource changes into a series of actions which must happen synchronously and those which can happen asynchronously, saving a significant amount of execution time and requiring no additional effort from the user.  We can also execute these activities in a shared connection or connection pool to reduce the overhead of spawning a new Python process and API connection for each task.
 
-In the above example, the VPC and security group must be synchronously created first, but the instance and cache could be created at the same time without blocking each other.  Additional resources added to the definition could potentially be created with further asynchronousity. 
-
-Improvements to Ansible's ability to execute tasks asynchronously can also be used with existing automation and collections, without requiring users to adopt Resource Based
+In the above example, the VPC and security group must be synchronously created first, but with the resource format proposed by Pravic the instance and cache could be created at the same time without blocking each other.  Additional resources added to the definition could potentially be created with further asynchronousity. 
 
 ## Consequences
 
