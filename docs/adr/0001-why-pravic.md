@@ -34,7 +34,7 @@ This work would additionally allow us to better enable machine-driven content cr
 
 ### Resource Declaration
 
-A resource definition should be the authoritative view of the state or status of a resource.  The definition provides a configuration as code view of the desired state of the resource.  This differs from Ansible's existing task-based approach to cloud automation by abstracting the individual steps necessary to achieve the desired state, which can involve many modules and tasks which must be executed in a strict order for many cloud services today.
+A resource definition should be the authoritative view of the state or status of a resource.  The definition provides a configuration as code view of the desired state of the resource.  This differs from Ansible's existing task-based approach to cloud automation by abstracting the individual steps necessary to achieve the desired state, which can involve many modules and tasks which must be executed in a strict order for many cloud services today. An example resource definition might look something like this:
 ```yaml
 ---
 resources:
