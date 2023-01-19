@@ -8,7 +8,8 @@ class ActionModule(ActionBase):
     def run(self, tmp=None, task_vars=None):
         super().run(tmp, task_vars)
         module_args = copy.deepcopy(self._task.args)
-        module_args["resources"] = task_vars.get("resources", {})
+        if not module_args.get("resources"):
+            module_args["resources"] = task_vars.get("resources", {})
 
         try:
             state_file = task_vars.get("state_file")

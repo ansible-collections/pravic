@@ -88,6 +88,7 @@ class CloudClient(metaclass=ABCMeta):
 
         sorter.prepare()
         with concurrent.futures.ThreadPoolExecutor() as executor:
+            current_state['changed'] = False
             while sorter:
                 futures = {}
                 for name in sorter.get_ready():
@@ -105,6 +106,7 @@ class CloudClient(metaclass=ABCMeta):
                     name = futures[future]
                     if result:
                         current_state[name] = result
+                        current_state['changed'] |= result['changed']
                     else:
                         try:
                             del current_state[name]
