@@ -54,7 +54,7 @@ class ResourceExceptionError(Exception):
         super().__init__(self)
 
 
-class PravicCloudClient(metaclass=ABCMeta):
+class CloudClient(metaclass=ABCMeta):
 
     def __init__(self, **kwargs: Any) -> None:
         pass

@@ -13,7 +13,7 @@ except ImportError:
     HAS_BOTO3 = False
 
 from ansible.module_utils.basic import missing_required_lib
-from ansible_collections.cloud.pravic.plugins.module_utils.resource import PravicCloudClient
+from ansible_collections.cloud.pravic.plugins.module_utils.resource import CloudClient
 
 
 class JsonPatch(list):
@@ -98,7 +98,7 @@ class AwsBotocoreError(Exception):
         super().__init__(self)
 
 
-class AwsClient(PravicCloudClient):
+class AwsClient(CloudClient):
     def __init__(self, **kwargs: Any) -> None:
 
         if not HAS_BOTO3:
