@@ -86,7 +86,7 @@ resources:
 
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.cloud.pravic.plugins.module_utils.client import AwsClient
+from ansible_collections.cloud.pravic.plugins.module_utils.aws.client import AwsClient
 
 
 ARG_SPEC = {
