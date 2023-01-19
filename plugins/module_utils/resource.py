@@ -4,6 +4,8 @@ import operator
 import re
 from graphlib import TopologicalSorter
 import traceback
+from abc import ABCMeta, abstractmethod
+from typing import Dict, Any
 
 PYYAML_IMP_ERR = None
 try:
@@ -52,48 +54,61 @@ class ResourceExceptionError(Exception):
         super().__init__(self)
 
 
-def run(desired_state, current_state, client, state):
+class PravicCloudClient(metaclass=ABCMeta):
 
-    if not HAS_PYYAML:
-        raise ResourceExceptionError(
-            msg=missing_required_lib('PyYAML'),
-            exc=PYYAML_IMP_ERR
-        )
+    def __init__(self, **kwargs: Any) -> None:
+        pass
 
-    sorter = TopologicalSorter()
-    for name, resource in desired_state.items():
-        if state == "present":
-            sorter.add(
-                name, *map(operator.itemgetter(1), REREG.findall(yaml.dump(resource)))
+    @abstractmethod
+    def present(self, resource: Dict) -> Dict:
+        pass
+
+    @abstractmethod
+    def absent(self, resource: Dict) -> Dict:
+        pass
+
+    def run(self, desired_state, current_state, state):
+
+        if not HAS_PYYAML:
+            raise ResourceExceptionError(
+                msg=missing_required_lib('PyYAML'),
+                exc=PYYAML_IMP_ERR
             )
-        elif state == "absent":
-            sorter.add(name)
-            for item in map(operator.itemgetter(1), REREG.findall(yaml.dump(resource))):
-                sorter.add(item, name)
 
-    sorter.prepare()
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        while sorter:
-            futures = {}
-            for name in sorter.get_ready():
-                if state == "present":
-                    node = resolve_refs(desired_state[name], current_state)
-                    futures[executor.submit(client.present, node)] = name
-                elif state == "absent":
-                    if name not in current_state:
-                        sorter.done(name)
-                        continue
-                    node = resolve_refs(desired_state[name], current_state)
-                    futures[executor.submit(client.absent, node)] = name
-            for future in concurrent.futures.as_completed(futures):
-                result = future.result()
-                name = futures[future]
-                if result:
-                    current_state[name] = result
-                else:
-                    try:
-                        del current_state[name]
-                    except KeyError:
-                        pass
-                sorter.done(name)
-    return current_state
+        sorter = TopologicalSorter()
+        for name, resource in desired_state.items():
+            if state == "present":
+                sorter.add(
+                    name, *map(operator.itemgetter(1), REREG.findall(yaml.dump(resource)))
+                )
+            elif state == "absent":
+                sorter.add(name)
+                for item in map(operator.itemgetter(1), REREG.findall(yaml.dump(resource))):
+                    sorter.add(item, name)
+
+        sorter.prepare()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            while sorter:
+                futures = {}
+                for name in sorter.get_ready():
+                    if state == "present":
+                        node = resolve_refs(desired_state[name], current_state)
+                        futures[executor.submit(self.present, node)] = name
+                    elif state == "absent":
+                        if name not in current_state:
+                            sorter.done(name)
+                            continue
+                        node = resolve_refs(desired_state[name], current_state)
+                        futures[executor.submit(self.absent, node)] = name
+                for future in concurrent.futures.as_completed(futures):
+                    result = future.result()
+                    name = futures[future]
+                    if result:
+                        current_state[name] = result
+                    else:
+                        try:
+                            del current_state[name]
+                        except KeyError:
+                            pass
+                    sorter.done(name)
+        return current_state

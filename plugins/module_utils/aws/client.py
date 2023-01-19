@@ -13,6 +13,7 @@ except ImportError:
     HAS_BOTO3 = False
 
 from ansible.module_utils.basic import missing_required_lib
+from ansible_collections.cloud.pravic.plugins.module_utils.resource import PravicCloudClient
 
 
 class JsonPatch(list):
@@ -97,11 +98,8 @@ class AwsBotocoreError(Exception):
         super().__init__(self)
 
 
-class AwsClient:
+class AwsClient(PravicCloudClient):
     def __init__(self, **kwargs: Any) -> None:
-        self.session = kwargs.pop("session")
-        self.resources = kwargs.pop("resources")
-        self.client = kwargs.pop("client")
 
         if not HAS_BOTO3:
             raise AwsBotocoreError(
@@ -109,12 +107,9 @@ class AwsClient:
                 exc=BOTO3_IMP_ERR
             )
 
-        if self.session is None:
-            self.session = boto3.session.Session(**kwargs)
-        if self.resources is None:
-            self.resources = Discoverer(self.session)
-        if self.client is None:
-            self.client = self.session.client("cloudcontrol")
+        self.session = boto3.session.Session(**kwargs)
+        self.resources = Discoverer(self.session)
+        self.client = self.session.client("cloudcontrol")
 
     def present(self, resource: Dict) -> Dict:
         r_type = self.resources.get(resource["Type"])
