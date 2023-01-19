@@ -24,7 +24,7 @@ Ansible's domain model is based on tasks, not resources. Conversely, a REST API 
 With a web API, the state that we're managing lives on the other end of an HTTP connection. It doesn't really matter where we run our playbook. The notion of local and remote host is largely meaningless in this context and adds a maintenance burden on developers and a cognitive burden on users. This functionality provides little benefit to REST-based collections.
 
 ### Task Execution
-The Ansible model where each task is executed in a separate Python process is an expensive constraint that prevents the easy reuse of connections. When a collection does all its work over HTTP, the benefits of connection reuse can be significant. Turbo Mode was designed to address this, but it is not a viable long-term solution. The maintenance burden is high. It requires extra work by plugin developers and playbook authors, and this is not something either of these personas should have to think about. It should be provided as base functionality by Ansible.
+The Ansible model where each task is executed in a separate Python process is an expensive constraint that prevents the easy reuse of connections. When a collection does all its work over HTTP, the benefits of connection reuse can be significant. [Turbo Mode](https://github.com/ansible-collections/cloud.common#ansible-turbo-module) was designed to address this, but it is not a viable long-term solution. The maintenance burden is high. It requires extra work by plugin developers and playbook authors, and this is not something either of these personas should have to think about. It should be provided as base functionality by Ansible.
 
 ## Decision
 
