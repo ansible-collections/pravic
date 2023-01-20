@@ -18,7 +18,7 @@
         - _result is successful
         - "'msg' in _result.resources.pravic_3_bucket_1"
         - _result.resources.pravic_3_bucket_1.msg == "Would have created resource type AWS::S3::Bucket if not in check_mode."
-    
+  
     - name: Create S3 bucket
       cloud.pravic.resources:
         state: "present"

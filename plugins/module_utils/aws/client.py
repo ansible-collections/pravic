@@ -27,7 +27,7 @@ def op(operation: str, path: str, value: str) -> Dict:
 
 
 class Resource:
-    def __init__(self, resource: Dict, resource_type: 'ResourceType') -> None:
+    def __init__(self, resource: Dict, resource_type: "ResourceType") -> None:
         self.resource_type = resource_type
         self._resource = resource
 
@@ -109,7 +109,9 @@ class AwsClient(CloudClient):
 
     def __init__(self, module: Any) -> None:
         self.module = module
-        self.session = boto3.session.Session(**self.module.params.get("connection") or {})
+        self.session = boto3.session.Session(
+            **self.module.params.get("connection") or {}
+        )
         self.resources = Discoverer(self.session)
         self.client = self.session.client("cloudcontrol")
 
@@ -130,7 +132,7 @@ class AwsClient(CloudClient):
             existing = self._get_resource(desired)
             result = self._delete(existing)
         except self.client.exceptions.ResourceNotFoundException:
-            result = Resource({}, r_type)
+            result = self.make_result(False, Resource({}, r_type), "")
         return result
 
     def _get_resource(self, resource: Resource) -> Resource:
@@ -140,33 +142,34 @@ class AwsClient(CloudClient):
         return resource.resource_type.make(
             json.loads(result["ResourceDescription"]["Properties"])
         )
-    
+
     @staticmethod
-    def make_response(changed, result, msg):
+    def make_result(changed, result, msg):
         result = {"changed": changed, **result.resource}
         if msg:
-            result['msg'] = msg
+            result["msg"] = msg
         return result
 
     def _create(self, resource: Resource) -> Resource:
         changed = True
-        msg = ''
-        if  self.module.check_mode:
-            msg=f"Would have created resource type {resource.type_name} if not in check_mode."
+        msg = ""
+        if self.module.check_mode:
+            msg = f"Would have created resource type {resource.type_name} if not in check_mode."
             result = resource
         else:
             result = self.client.create_resource(
-                TypeName=resource.type_name, DesiredState=json.dumps(resource.properties)
+                TypeName=resource.type_name,
+                DesiredState=json.dumps(resource.properties),
             )
             try:
                 self._wait(result["ProgressEvent"]["RequestToken"])
             except botocore.exceptions.WaiterError as e:
-                raise Exception(e.last_response["ProgressEvent"]["StatusMessage"]) 
+                raise Exception(e.last_response["ProgressEvent"]["StatusMessage"])
             result = self._get_resource(resource)
-        return self.make_response(changed, result, msg)
+        return self.make_result(changed, result, msg)
 
     def _update(self, existing: Resource, desired: Resource) -> Resource:
-        msg = ''
+        msg = ""
         changed = False
         patch = JsonPatch()
         filtered = {k: v for k, v in desired.properties.items() if k not in desired.read_only_properties}
@@ -178,7 +181,7 @@ class AwsClient(CloudClient):
         if patch:
             changed = True
             if self.module.check_mode:
-                msg=f"Would have updated resource type {existing.type_name} if not in check_mode."
+                msg = f"Would have updated resource type {existing.type_name} if not in check_mode."
             else:
                 result = self.client.update_resource(
                     TypeName=existing.type_name,
@@ -186,19 +189,19 @@ class AwsClient(CloudClient):
                     PatchDocument=str(patch),
                 )
                 self._wait(result["ProgressEvent"]["RequestToken"])
-        return self.make_response(changed, self._get_resource(desired), msg)
+        return self.make_result(changed, self._get_resource(desired), msg)
 
     def _delete(self, resource: Resource) -> Resource:
-        msg = ''
+        msg = ""
         changed = True
-        if  self.module.check_mode:
-            msg=f"Would have deleted resource type {resource.type_name} if not in check_mode."
+        if self.module.check_mode:
+            msg = f"Would have deleted resource type {resource.type_name} if not in check_mode."
         else:
             result = self.client.delete_resource(
                 TypeName=resource.type_name, Identifier=resource.identifier
             )
             self._wait(result["ProgressEvent"]["RequestToken"])
-        return self.make_response(changed, resource, msg)
+        return self.make_result(changed, resource, msg)
 
     def _wait(self, token: str) -> None:
         self.client.get_waiter("resource_request_success").wait(

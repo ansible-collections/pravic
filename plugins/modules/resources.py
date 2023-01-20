@@ -105,7 +105,7 @@ def main():
         module.params.get("current_state", {}),
         module.params["state"],
     )
-    module.exit_json(changed=result['changed'], resources=result)
+    module.exit_json(changed=result["changed"], resources=result)
 
 
 if __name__ == "__main__":
