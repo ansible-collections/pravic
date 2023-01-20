@@ -1,0 +1,96 @@
+- block:    
+    - name: Create S3 bucket - check_mode=True
+      cloud.pravic.resources:
+        state: "present"
+        resources:
+          pravic_3_bucket_1:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: pravic-test-s3-bucket
+              Tags:
+                - Key: bucket
+                  Value: "Pravic"
+      check_mode: true
+      register: _result
+    
+    - assert:
+        that:
+        - _result is successful
+        - "'msg' in _result.resources.pravic_3_bucket_1"
+        - _result.resources.pravic_3_bucket_1.msg == "Would have created resource type AWS::S3::Bucket if not in check_mode."
+    
+    - name: Create S3 bucket
+      cloud.pravic.resources:
+        state: "present"
+        resources:
+          pravic_3_bucket_1:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: pravic-test-s3-bucket
+              Tags:
+                - Key: bucket
+                  Value: "Pravic"
+      register: _result
+    
+    - assert:
+        that:
+        - _result is successful
+    
+    - name: Update S3 bucket - check_mode=True
+      cloud.pravic.resources:
+        state: "present"
+        resources:
+          pravic_3_bucket_1:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: pravic-test-s3-bucket
+              ObjectOwnership: ObjectWriter
+      check_mode: true
+      register: _result
+    
+    - assert:
+        that:
+        - _result is successful
+        - "'msg' in _result.resources.pravic_3_bucket_1"
+        - _result.resources.pravic_3_bucket_1.msg == "Would have updated resource type AWS::S3::Bucket if not in check_mode."
+
+    - name: Delete S3 bucket - check_mode=True
+      cloud.pravic.resources:
+        state: "absent"
+        resources:
+          pravic_3_bucket_1:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: pravic-test-s3-bucket
+      check_mode: true
+      register: _result
+
+    - assert:
+        that:
+        - _result is successful
+        - "'msg' in _result.resources.pravic_3_bucket_1"
+        - _result.resources.pravic_3_bucket_1.msg == "Would have deleted resource type AWS::S3::Bucket if not in check_mode."
+    
+    - name: Delete S3 bucket
+      cloud.pravic.resources:
+        state: "absent"
+        resources:
+          pravic_3_bucket_1:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: pravic-test-s3-bucket
+      register: _result
+
+    - assert:
+        that:
+        - _result is successful
+
+  always:
+    - name: Delete S3 bucket
+      cloud.pravic.resources:
+        state: "absent"
+        resources:
+          pravic_3_bucket_1:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: pravic-test-s3-bucket
