@@ -8,7 +8,7 @@ from unittest import mock
 import pytest
 
 
-from ansible_collections.cloud.pravic.plugins.module_utils.client import (
+from ansible_collections.cloud.pravic.plugins.module_utils.aws.client import (
     AwsClient,
     Discoverer,
     Resource,
@@ -63,10 +63,15 @@ def aws_client():
     class NotFound(Exception):
         pass
 
-    resource = AwsClient()
-    resource.session = Mock()
-    resource.client = MagicMock()
-    resource.resources = Mock()
+    class AwsClientMock(AwsClient):
+
+        def __init__(self):
+
+            self.session = Mock()
+            self.client = MagicMock()
+            self.resources = Mock()
+
+    resource = AwsClientMock()
     resource.client.exceptions.ResourceNotFoundException = NotFound
     return resource
 

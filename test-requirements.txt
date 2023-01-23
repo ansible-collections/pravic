@@ -1,0 +1,6 @@
+botocore
+boto3
+pytest
+pytest-forked
+pytest-xdist
+pytest-mock

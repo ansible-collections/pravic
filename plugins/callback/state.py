@@ -1,5 +1,17 @@
-import json
+# (C) 2022 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+DOCUMENTATION = '''
+    name: state
+    type: aggregate
+    short_description: gathers resources state
+    description:
+      - Ansible callback plugin for collecting the resources state
+    requirements:
+      - whitelisting in configuration.
+'''
+
+import json
 from ansible.plugins.callback import CallbackBase
 
 
