@@ -132,7 +132,7 @@ class AwsClient(CloudClient):
             existing = self._get_resource(desired)
             result = self._delete(existing)
         except self.client.exceptions.ResourceNotFoundException:
-            result = self.make_result(False, Resource({}, r_type), "")
+            result = self.make_result(False, Resource({}, r_type), "Skipped")
         return result
 
     def _get_resource(self, resource: Resource) -> Resource:
@@ -152,7 +152,7 @@ class AwsClient(CloudClient):
 
     def _create(self, resource: Resource) -> Resource:
         changed = True
-        msg = ""
+        msg = "Created"
         if self.module.check_mode:
             msg = f"Would have created resource type {resource.type_name} if not in check_mode."
             result = resource
@@ -169,7 +169,7 @@ class AwsClient(CloudClient):
         return self.make_result(changed, result, msg)
 
     def _update(self, existing: Resource, desired: Resource) -> Resource:
-        msg = ""
+        msg = "Skipped"
         changed = False
         patch = JsonPatch()
         filtered = {k: v for k, v in desired.properties.items() if k not in desired.read_only_properties}
@@ -183,6 +183,7 @@ class AwsClient(CloudClient):
             if self.module.check_mode:
                 msg = f"Would have updated resource type {existing.type_name} if not in check_mode."
             else:
+                msg = "Updated"
                 result = self.client.update_resource(
                     TypeName=existing.type_name,
                     Identifier=existing.identifier,
@@ -192,7 +193,7 @@ class AwsClient(CloudClient):
         return self.make_result(changed, self._get_resource(desired), msg)
 
     def _delete(self, resource: Resource) -> Resource:
-        msg = ""
+        msg = "Deleted"
         changed = True
         if self.module.check_mode:
             msg = f"Would have deleted resource type {resource.type_name} if not in check_mode."
