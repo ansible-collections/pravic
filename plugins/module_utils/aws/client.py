@@ -144,13 +144,13 @@ class AwsClient(CloudClient):
         )
 
     @staticmethod
-    def make_result(changed, result, msg):
+    def make_result(changed: bool, result: Resource, msg: str) -> Dict:
         result = {"changed": changed, **result.resource}
         if msg:
             result["msg"] = msg
         return result
 
-    def _create(self, resource: Resource) -> Resource:
+    def _create(self, resource: Resource) -> Dict:
         changed = True
         msg = "Created"
         if self.module.check_mode:
@@ -168,7 +168,7 @@ class AwsClient(CloudClient):
             result = self._get_resource(resource)
         return self.make_result(changed, result, msg)
 
-    def _update(self, existing: Resource, desired: Resource) -> Resource:
+    def _update(self, existing: Resource, desired: Resource) -> Dict:
         msg = "Skipped"
         changed = False
         patch = JsonPatch()
@@ -192,7 +192,7 @@ class AwsClient(CloudClient):
                 self._wait(result["ProgressEvent"]["RequestToken"])
         return self.make_result(changed, self._get_resource(desired), msg)
 
-    def _delete(self, resource: Resource) -> Resource:
+    def _delete(self, resource: Resource) -> Dict:
         msg = "Deleted"
         changed = True
         if self.module.check_mode:

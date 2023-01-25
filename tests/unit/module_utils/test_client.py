@@ -24,7 +24,9 @@ def resources(filepath):
 
 RESOURCE = resources("fixtures/resource.json")
 SCHEMA = resources("fixtures/schema.json")
-RESPONSE_OP = resources("fixtures/response_op.json")
+RESPONSE_OP_UPDATE = resources("fixtures/response_op_update.json")
+RESPONSE_OP_CREATE = resources("fixtures/response_op_create.json")
+RESPONSE_OP_DELETE = resources("fixtures/response_op_delete.json")
 RESPONSE_GET = resources("fixtures/response_get.json")
 
 
@@ -64,10 +66,10 @@ def aws_client():
         pass
 
     class AwsClientMock(AwsClient):
-
         def __init__(self):
 
             self.session = Mock()
+            self.module = MagicMock(check_mode=False)
             self.client = MagicMock()
             self.resources = Mock()
 
@@ -83,7 +85,9 @@ def discoverer():
 
     instance_discoverer = Discoverer(Mock())
     instance_discoverer.client = MagicMock()
-    instance_discoverer.client.describe_type.return_value = {"Schema": json.dumps(SCHEMA)}
+    instance_discoverer.client.describe_type.return_value = {
+        "Schema": json.dumps(SCHEMA)
+    }
     instance_discoverer.client.exceptions.TypeNotFoundException = NotFound
     return instance_discoverer
 
@@ -112,7 +116,7 @@ def test_present_update_resource_no_diff(aws_client, mock_resource_type):
     result = aws_client.present(RESOURCE)
     aws_client.client.update_resource.assert_called_once()
     aws_client.client.create_resource.assert_not_called()
-    assert result == RESPONSE_OP
+    assert result == RESPONSE_OP_UPDATE
 
 
 @mock.patch.object(AwsClient, "_get_resource")
@@ -131,7 +135,7 @@ def test_present_create_resource(get_resource, aws_client, mock_resource_type):
     aws_client.client.create_resource.assert_called_once_with(
         TypeName=res_type.type_name, DesiredState=json.dumps(res_type.properties)
     )
-    assert result == RESPONSE_OP
+    assert result == RESPONSE_OP_CREATE
 
 
 def test_absent(aws_client, mock_resource_type):
@@ -139,7 +143,7 @@ def test_absent(aws_client, mock_resource_type):
     aws_client.client.get_resource.return_value = RESPONSE_GET
     result = aws_client.absent(RESOURCE)
     aws_client.client.delete_resource.assert_called_once()
-    assert result == RESPONSE_OP
+    assert result == RESPONSE_OP_DELETE
 
 
 @mock.patch.object(AwsClient, "_get_resource")
@@ -147,4 +151,9 @@ def test_absent_not_found(get_resource, aws_client, mock_resource_type):
     aws_client.resources.get.return_value = mock_resource_type
     get_resource.side_effect = [aws_client.client.exceptions.ResourceNotFoundException]
     result = aws_client.absent(RESOURCE)
-    assert result == {"Type": "AWS::IAM::Role", "Properties": {}}
+    assert result == {
+        "Type": "AWS::IAM::Role",
+        "Properties": {},
+        "changed": False,
+        "msg": "Skipped",
+    }
