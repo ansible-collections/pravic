@@ -2,9 +2,14 @@
   gather_facts: no
   collections:
   - cloud.pravic
+  vars:
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key | default(omit) }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key | default(omit) }}"
+    AWS_SESSION_TOKEN: "{{ security_token | default(omit) }}"
+    AWS_REGION: "{{ aws_region | default(omit) }}"
 
   tasks:
-  - block:    
+  - block:
       - name: Create S3 bucket - check_mode=True
         cloud.pravic.resources:
           state: "present"
@@ -18,13 +23,13 @@
                     Value: "Pravic"
         check_mode: true
         register: _result
-      
+
       - assert:
           that:
           - _result is successful
           - "'msg' in _result.resources.pravic_3_bucket_1"
-          - _result.resources.pravic_3_bucket_1.msg == "Would have created resource type AWS::S3::Bucket if not in check_mode."
-    
+          - _result.resources.pravic_3_bucket_1.msg == "Created"
+
       - name: Create S3 bucket
         cloud.pravic.resources:
           state: "present"
@@ -37,11 +42,11 @@
                   - Key: bucket
                     Value: "Pravic"
         register: _result
-      
+
       - assert:
           that:
           - _result is successful
-      
+
       - name: Update S3 bucket - check_mode=True
         cloud.pravic.resources:
           state: "present"
@@ -53,12 +58,12 @@
                 ObjectOwnership: ObjectWriter
         check_mode: true
         register: _result
-      
+
       - assert:
           that:
           - _result is successful
           - "'msg' in _result.resources.pravic_3_bucket_1"
-          - _result.resources.pravic_3_bucket_1.msg == "Would have updated resource type AWS::S3::Bucket if not in check_mode."
+          - _result.resources.pravic_3_bucket_1.msg == "Updated"
 
       - name: Delete S3 bucket - check_mode=True
         cloud.pravic.resources:
@@ -75,8 +80,8 @@
           that:
           - _result is successful
           - "'msg' in _result.resources.pravic_3_bucket_1"
-          - _result.resources.pravic_3_bucket_1.msg == "Would have deleted resource type AWS::S3::Bucket if not in check_mode."
-      
+          - _result.resources.pravic_3_bucket_1.msg == "Deleted"
+
       - name: Delete S3 bucket
         cloud.pravic.resources:
           state: "absent"

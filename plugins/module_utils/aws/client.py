@@ -7,6 +7,7 @@ BOTO3_IMP_ERR = None
 try:
     import boto3.session
     import botocore
+
     HAS_BOTO3 = True
 except ImportError:
     BOTO3_IMP_ERR = traceback.format_exc()
@@ -103,8 +104,7 @@ class AwsClient(CloudClient):
 
         if not HAS_BOTO3:
             raise AwsBotocoreError(
-                msg=missing_required_lib('boto3 and botocore'),
-                exc=BOTO3_IMP_ERR
+                msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR
             )
 
     def __init__(self, module: Any) -> None:
@@ -145,16 +145,12 @@ class AwsClient(CloudClient):
 
     @staticmethod
     def make_result(changed: bool, result: Resource, msg: str) -> Dict:
-        result = {"changed": changed, **result.resource}
-        if msg:
-            result["msg"] = msg
-        return result
+        return {"changed": changed, **result.resource, "msg": msg}
 
     def _create(self, resource: Resource) -> Dict:
         changed = True
         msg = "Created"
         if self.module.check_mode:
-            msg = f"Would have created resource type {resource.type_name} if not in check_mode."
             result = resource
         else:
             result = self.client.create_resource(
@@ -172,7 +168,11 @@ class AwsClient(CloudClient):
         msg = "Skipped"
         changed = False
         patch = JsonPatch()
-        filtered = {k: v for k, v in desired.properties.items() if k not in desired.read_only_properties}
+        filtered = {
+            k: v
+            for k, v in desired.properties.items()
+            if k not in desired.read_only_properties
+        }
         for k, v in filtered.items():
             if k not in existing.properties:
                 patch.append(op("add", k, v))
@@ -180,10 +180,8 @@ class AwsClient(CloudClient):
                 patch.append(op("replace", k, v))
         if patch:
             changed = True
-            if self.module.check_mode:
-                msg = f"Would have updated resource type {existing.type_name} if not in check_mode."
-            else:
-                msg = "Updated"
+            msg = "Updated"
+            if not self.module.check_mode:
                 result = self.client.update_resource(
                     TypeName=existing.type_name,
                     Identifier=existing.identifier,
@@ -195,9 +193,7 @@ class AwsClient(CloudClient):
     def _delete(self, resource: Resource) -> Dict:
         msg = "Deleted"
         changed = True
-        if self.module.check_mode:
-            msg = f"Would have deleted resource type {resource.type_name} if not in check_mode."
-        else:
+        if not self.module.check_mode:
             result = self.client.delete_resource(
                 TypeName=resource.type_name, Identifier=resource.identifier
             )
