@@ -100,18 +100,15 @@ class AwsBotocoreError(Exception):
 
 
 class AwsClient(CloudClient):
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, check_mode=False, **kwargs) -> None:
 
         if not HAS_BOTO3:
             raise AwsBotocoreError(
                 msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR
             )
 
-    def __init__(self, module: Any) -> None:
-        self.module = module
-        self.session = boto3.session.Session(
-            **self.module.params.get("connection") or {}
-        )
+        self.check_mode = check_mode
+        self.session = boto3.session.Session(**kwargs)
         self.resources = Discoverer(self.session)
         self.client = self.session.client("cloudcontrol")
 
@@ -150,7 +147,7 @@ class AwsClient(CloudClient):
     def _create(self, resource: Resource) -> Dict:
         changed = True
         msg = "Created"
-        if self.module.check_mode:
+        if self.check_mode:
             result = resource
         else:
             result = self.client.create_resource(
@@ -181,7 +178,7 @@ class AwsClient(CloudClient):
         if patch:
             changed = True
             msg = "Updated"
-            if not self.module.check_mode:
+            if not self.check_mode:
                 result = self.client.update_resource(
                     TypeName=existing.type_name,
                     Identifier=existing.identifier,
@@ -193,7 +190,7 @@ class AwsClient(CloudClient):
     def _delete(self, resource: Resource) -> Dict:
         msg = "Deleted"
         changed = True
-        if not self.module.check_mode:
+        if not self.check_mode:
             result = self.client.delete_resource(
                 TypeName=resource.type_name, Identifier=resource.identifier
             )

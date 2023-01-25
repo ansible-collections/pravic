@@ -69,9 +69,9 @@ def aws_client():
         def __init__(self):
 
             self.session = Mock()
-            self.module = MagicMock(check_mode=False)
             self.client = MagicMock()
             self.resources = Mock()
+            self.check_mode = False
 
     resource = AwsClientMock()
     resource.client.exceptions.ResourceNotFoundException = NotFound

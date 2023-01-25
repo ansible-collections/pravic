@@ -6,7 +6,7 @@
     AWS_ACCESS_KEY_ID: "{{ aws_access_key | default(omit) }}"
     AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key | default(omit) }}"
     AWS_SESSION_TOKEN: "{{ security_token | default(omit) }}"
-    AWS_REGION: "{{ aws_region | default(omit) }}"
+    AWS_REGION: "{{ aws_region | default('us-east-1') }}"
 
   tasks:
   - block:
