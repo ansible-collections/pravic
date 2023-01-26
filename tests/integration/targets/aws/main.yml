@@ -2,7 +2,7 @@
   gather_facts: no
   collections:
   - cloud.pravic
-  vars:
+  environment:
     AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
     AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
     AWS_SESSION_TOKEN: "{{ security_token | default(omit) }}"
