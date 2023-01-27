@@ -106,6 +106,7 @@ def main():
         module.params.get("resources", []),
         module.params.get("current_state", {}),
         module.params["state"],
+        module.check_mode,
     )
     module.exit_json(changed=result["changed"], resources=result)
 

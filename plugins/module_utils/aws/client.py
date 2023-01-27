@@ -147,6 +147,7 @@ class AwsClient(CloudClient):
     def _create(self, resource: Resource) -> Dict:
         changed = True
         msg = "Created"
+
         if self.check_mode:
             result = resource
         else:

@@ -14,7 +14,7 @@
         cloud.pravic.resources:
           state: "present"
           resources:
-            pravic_3_bucket_1:
+            pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
                 BucketName: pravic-test-s3-bucket
@@ -28,13 +28,13 @@
           that:
           - _result is successful
           - "'msg' in _result.resources.pravic_3_bucket_1"
-          - _result.resources.pravic_3_bucket_1.msg == "Created"
+          - _result.resources.pravic_s3_bucket_1.msg == "Created"
 
       - name: Create S3 bucket
         cloud.pravic.resources:
           state: "present"
           resources:
-            pravic_3_bucket_1:
+            pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
                 BucketName: pravic-test-s3-bucket
@@ -51,7 +51,7 @@
         cloud.pravic.resources:
           state: "present"
           resources:
-            pravic_3_bucket_1:
+            pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
                 BucketName: pravic-test-s3-bucket
@@ -62,14 +62,14 @@
       - assert:
           that:
           - _result is successful
-          - "'msg' in _result.resources.pravic_3_bucket_1"
-          - _result.resources.pravic_3_bucket_1.msg == "Updated"
+          - "'msg' in _result.resources.pravic_s3_bucket_1"
+          - _result.resources.pravic_s3_bucket_1.msg == "Updated"
 
       - name: Delete S3 bucket - check_mode=True
         cloud.pravic.resources:
           state: "absent"
           resources:
-            pravic_3_bucket_1:
+            pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
                 BucketName: pravic-test-s3-bucket
@@ -79,19 +79,41 @@
       - assert:
           that:
           - _result is successful
-          - "'msg' in _result.resources.pravic_3_bucket_1"
-          - _result.resources.pravic_3_bucket_1.msg == "Deleted"
+          - "'msg' in _result.resources.pravic_s3_bucket_1"
+          - _result.resources.pravic_s3_bucket_1.msg == "Deleted"
 
       - name: Delete S3 bucket
         cloud.pravic.resources:
           state: "absent"
           resources:
-            pravic_3_bucket_1:
+            pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
                 BucketName: pravic-test-s3-bucket
         register: _result
 
+      - assert:
+          that:
+          - _result is successful
+      
+      - name: Create a bunch of S3 buckets with interdependency - check_mode=True
+        cloud.pravic.resources:
+          state: "present"
+          resources:
+            pravic_s3_bucket_2:
+              Type: AWS::S3::Bucket
+              Properties:
+                BucketName: pravic-test-s3-bucket-2
+            pravic_s3_bucket_3:
+              Type: AWS::S3::Bucket
+              Properties:
+                BucketName: pravic-test-s3-bucket-3
+                Tags:
+                  - Key: OtherArn
+                    Value: resource:pravic_s3_bucket_2.Properties.Arn
+        check_mode: true
+        register: _result
+      
       - assert:
           that:
           - _result is successful
@@ -101,7 +123,15 @@
         cloud.pravic.resources:
           state: "absent"
           resources:
-            pravic_3_bucket_1:
+            pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
                 BucketName: pravic-test-s3-bucket
+            pravic_s3_bucket_2:
+              Type: AWS::S3::Bucket
+              Properties:
+                BucketName: pravic-test-s3-bucket-2
+            pravic_s3_bucket_3:
+              Type: AWS::S3::Bucket
+              Properties:
+                BucketName: pravic-test-s3-bucket-3
