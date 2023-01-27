@@ -27,7 +27,7 @@
       - assert:
           that:
           - _result is successful
-          - "'msg' in _result.resources.pravic_3_bucket_1"
+          - "'msg' in _result.resources.pravic_s3_bucket_1"
           - _result.resources.pravic_s3_bucket_1.msg == "Created"
 
       - name: Create S3 bucket
