@@ -98,14 +98,17 @@ ARG_SPEC = {
 
 
 def main():
-    module = AnsibleModule(argument_spec=ARG_SPEC)
-    client = AwsClient(**module.params.get("connection") or {})
+    module = AnsibleModule(argument_spec=ARG_SPEC, supports_check_mode=True)
+    client = AwsClient(
+        check_mode=module.check_mode, **module.params.get("connection") or {}
+    )
     result = client.run(
         module.params.get("resources", []),
         module.params.get("current_state", {}),
         module.params["state"],
+        module.check_mode,
     )
-    module.exit_json(changed=True, resources=result)
+    module.exit_json(changed=result["changed"], resources=result)
 
 
 if __name__ == "__main__":

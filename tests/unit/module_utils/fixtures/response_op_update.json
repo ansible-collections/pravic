@@ -1,4 +1,5 @@
 {
+   "changed": true, 
    "Type": "AWS::IAM::Role",
    "Properties": {
       "Path": "/",
@@ -19,5 +20,6 @@
       },
       "Arn": "arn:aws:iam::123456789012:role/eda-test-role",
       "RoleId": "AROA2PYXPFVF3SXSYEPHJ"
-   }
+   },
+   "msg": "Updated"
 }

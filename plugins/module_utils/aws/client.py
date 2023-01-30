@@ -7,6 +7,7 @@ BOTO3_IMP_ERR = None
 try:
     import boto3.session
     import botocore
+
     HAS_BOTO3 = True
 except ImportError:
     BOTO3_IMP_ERR = traceback.format_exc()
@@ -27,7 +28,7 @@ def op(operation: str, path: str, value: str) -> Dict:
 
 
 class Resource:
-    def __init__(self, resource: Dict, resource_type: 'ResourceType') -> None:
+    def __init__(self, resource: Dict, resource_type: "ResourceType") -> None:
         self.resource_type = resource_type
         self._resource = resource
 
@@ -99,14 +100,14 @@ class AwsBotocoreError(Exception):
 
 
 class AwsClient(CloudClient):
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, check_mode=False, **kwargs) -> None:
 
         if not HAS_BOTO3:
             raise AwsBotocoreError(
-                msg=missing_required_lib('boto3 and botocore'),
-                exc=BOTO3_IMP_ERR
+                msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR
             )
 
+        self.check_mode = check_mode
         self.session = boto3.session.Session(**kwargs)
         self.resources = Discoverer(self.session)
         self.client = self.session.client("cloudcontrol")
@@ -119,7 +120,7 @@ class AwsClient(CloudClient):
             result = self._update(existing, desired)
         except self.client.exceptions.ResourceNotFoundException:
             result = self._create(desired)
-        return result.resource
+        return result
 
     def absent(self, resource: Dict) -> Dict:
         r_type = self.resources.get(resource["Type"])
@@ -128,8 +129,8 @@ class AwsClient(CloudClient):
             existing = self._get_resource(desired)
             result = self._delete(existing)
         except self.client.exceptions.ResourceNotFoundException:
-            result = Resource({}, r_type)
-        return result.resource
+            result = self.make_result(False, Resource({}, r_type), "Skipped")
+        return result
 
     def _get_resource(self, resource: Resource) -> Resource:
         result = self.client.get_resource(
@@ -139,39 +140,63 @@ class AwsClient(CloudClient):
             json.loads(result["ResourceDescription"]["Properties"])
         )
 
-    def _create(self, resource: Resource) -> Resource:
-        result = self.client.create_resource(
-            TypeName=resource.type_name, DesiredState=json.dumps(resource.properties)
-        )
-        try:
-            self._wait(result["ProgressEvent"]["RequestToken"])
-        except botocore.exceptions.WaiterError as e:
-            raise Exception(e.last_response["ProgressEvent"]["StatusMessage"])
-        return self._get_resource(resource)
+    @staticmethod
+    def make_result(changed: bool, result: Resource, msg: str) -> Dict:
+        return {"changed": changed, **result.resource, "msg": msg}
 
-    def _update(self, existing: Resource, desired: Resource) -> Resource:
+    def _create(self, resource: Resource) -> Dict:
+        changed = True
+        msg = "Created"
+
+        if self.check_mode:
+            result = resource
+        else:
+            result = self.client.create_resource(
+                TypeName=resource.type_name,
+                DesiredState=json.dumps(resource.properties),
+            )
+            try:
+                self._wait(result["ProgressEvent"]["RequestToken"])
+            except botocore.exceptions.WaiterError as e:
+                raise Exception(e.last_response["ProgressEvent"]["StatusMessage"])
+            result = self._get_resource(resource)
+        return self.make_result(changed, result, msg)
+
+    def _update(self, existing: Resource, desired: Resource) -> Dict:
+        msg = "Skipped"
+        changed = False
         patch = JsonPatch()
-        filtered = {k: v for k, v in desired.properties.items() if k not in desired.read_only_properties}
+        filtered = {
+            k: v
+            for k, v in desired.properties.items()
+            if k not in desired.read_only_properties
+        }
         for k, v in filtered.items():
             if k not in existing.properties:
                 patch.append(op("add", k, v))
             elif v != existing.properties.get(k):
                 patch.append(op("replace", k, v))
         if patch:
-            result = self.client.update_resource(
-                TypeName=existing.type_name,
-                Identifier=existing.identifier,
-                PatchDocument=str(patch),
+            changed = True
+            msg = "Updated"
+            if not self.check_mode:
+                result = self.client.update_resource(
+                    TypeName=existing.type_name,
+                    Identifier=existing.identifier,
+                    PatchDocument=str(patch),
+                )
+                self._wait(result["ProgressEvent"]["RequestToken"])
+        return self.make_result(changed, self._get_resource(desired), msg)
+
+    def _delete(self, resource: Resource) -> Dict:
+        msg = "Deleted"
+        changed = True
+        if not self.check_mode:
+            result = self.client.delete_resource(
+                TypeName=resource.type_name, Identifier=resource.identifier
             )
             self._wait(result["ProgressEvent"]["RequestToken"])
-        return self._get_resource(desired)
-
-    def _delete(self, resource: Resource) -> Resource:
-        result = self.client.delete_resource(
-            TypeName=resource.type_name, Identifier=resource.identifier
-        )
-        self._wait(result["ProgressEvent"]["RequestToken"])
-        return resource
+        return self.make_result(changed, resource, msg)
 
     def _wait(self, token: str) -> None:
         self.client.get_waiter("resource_request_success").wait(

@@ -1,0 +1,25 @@
+{
+    "changed": true, 
+    "Type": "AWS::IAM::Role",
+    "Properties": {
+       "Path": "/",
+       "MaxSessionDuration": 3600,
+       "RoleName": "eda-test-role",
+       "Description": "event-driven test role",
+       "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+             {
+                "Action": "sts:AssumeRole",
+                "Effect": "Allow",
+                "Principal": {
+                   "Service": "ec2.amazonaws.com"
+                }
+             }
+          ]
+       },
+       "Arn": "arn:aws:iam::123456789012:role/eda-test-role",
+       "RoleId": "AROA2PYXPFVF3SXSYEPHJ"
+    },
+    "msg": "Deleted"
+}
