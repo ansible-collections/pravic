@@ -18,7 +18,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket
+                BucketName: ansible-test-pravic-s3-bucket
                 Tags:
                   - Key: bucket
                     Value: "Pravic"
@@ -39,7 +39,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket
+                BucketName: ansible-test-pravic-s3-bucket
                 Tags:
                   - Key: bucket
                     Value: "Pravic"
@@ -57,7 +57,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket
+                BucketName: ansible-test-pravic-s3-bucket
                 ObjectOwnership: ObjectWriter
         check_mode: true
         register: _result
@@ -76,7 +76,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket
+                BucketName: ansible-test-pravic-s3-bucket
         check_mode: true
         register: _result
 
@@ -94,7 +94,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket
+                BucketName: ansible-test-pravic-s3-bucket
         register: _result
 
       - assert:
@@ -109,11 +109,11 @@
             pravic_s3_bucket_2:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket-2
+                BucketName: ansible-test-pravic-s3-bucket-2
             pravic_s3_bucket_3:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket-3
+                BucketName: ansible-test-pravic-s3-bucket-3
                 Tags:
                   - Key: OtherArn
                     Value: resource:pravic_s3_bucket_2.Properties.Arn
@@ -133,12 +133,12 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket
+                BucketName: ansible-test-pravic-s3-bucket
             pravic_s3_bucket_2:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket-2
+                BucketName: ansible-test-pravic-s3-bucket-2
             pravic_s3_bucket_3:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: pravic-test-s3-bucket-3
+                BucketName: ansible-test-pravic-s3-bucket-3
