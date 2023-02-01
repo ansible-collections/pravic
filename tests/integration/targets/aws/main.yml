@@ -13,6 +13,7 @@
       - name: Create S3 bucket - check_mode=True
         pravic.pravic.resources:
           state: "present"
+          client: "aws"
           resources:
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
@@ -32,6 +33,7 @@
 
       - name: Create S3 bucket
         pravic.pravic.resources:
+          client: "aws"
           state: "present"
           resources:
             pravic_s3_bucket_1:
@@ -49,6 +51,7 @@
 
       - name: Update S3 bucket - check_mode=True
         pravic.pravic.resources:
+          client: "aws"
           state: "present"
           resources:
             pravic_s3_bucket_1:
@@ -67,6 +70,7 @@
 
       - name: Delete S3 bucket - check_mode=True
         pravic.pravic.resources:
+          client: "aws"
           state: "absent"
           resources:
             pravic_s3_bucket_1:
@@ -84,6 +88,7 @@
 
       - name: Delete S3 bucket
         pravic.pravic.resources:
+          client: "aws"
           state: "absent"
           resources:
             pravic_s3_bucket_1:
@@ -99,6 +104,7 @@
       - name: Create a bunch of S3 buckets with interdependency - check_mode=True
         pravic.pravic.resources:
           state: "present"
+          client: "aws"
           resources:
             pravic_s3_bucket_2:
               Type: AWS::S3::Bucket
@@ -121,6 +127,7 @@
     always:
       - name: Delete S3 bucket
         pravic.pravic.resources:
+          client: aws
           state: "absent"
           resources:
             pravic_s3_bucket_1:

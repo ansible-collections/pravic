@@ -8,6 +8,8 @@ from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils.six.moves import configparser
 import ansible.module_utils.six.moves.urllib.parse as urlparse
 
+from ansible_collections.cloud.pravic.plugins.module_utils.exception import CloudException
+
 
 AZURE_CREDENTIAL_ENV_MAPPING = dict(
     profile='AZURE_PROFILE',
@@ -53,10 +55,6 @@ try:
 except ImportError:
     HAS_AZURE_CLI_CORE = False
     CLIError = Exception
-
-
-class AzureCredentialsException(Exception):
-    pass
 
 
 class AzureCredentials(object):
@@ -218,7 +216,7 @@ class AzureCredentials(object):
 
     @staticmethod
     def fail(msg):
-        raise AzureCredentialsException(msg)
+        raise CloudException(msg)
 
     def _get_env(self, module_key, default=None):
         "Read envvar matching module parameter"

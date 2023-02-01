@@ -1,0 +1,45 @@
+- name: Create resources
+  cloud.pravic.resources:
+    client: "azure"
+    resources: "{{ resources }}"
+  register: _create
+
+- name: Validate task is changed
+  assert:
+    that:
+      - _create is changed
+
+- name: Create resources once again (idempontency)
+  cloud.pravic.resources:
+    client: "azure"
+    resources: "{{ resources }}"
+  register: _idempotency
+
+- name: Validate task is not changed
+  assert:
+    that:
+      - _idempotency is not changed
+
+- name: Delete resources
+  cloud.pravic.resources:
+    client: "azure"
+    state: absent
+    resources: "{{ resources }}"
+  register: _delete
+
+- name: Validate task is changed
+  assert:
+    that:
+      - _delete is changed
+
+- name: Delete resources once again (idempontency)
+  cloud.pravic.resources:
+    client: "azure"
+    state: absent
+    resources: "{{ resources }}"
+  register: _idempotency
+
+- name: Validate task is not changed
+  assert:
+    that:
+      - _idempotency is not changed

@@ -1,0 +1,27 @@
+---
+resources:
+  vnet_1:
+    provider: Microsoft.Network
+    type: virtualNetworks
+    name: test-vnet
+    api-version: "2022-07-01"
+    resourceGroupName: "{{ resource_group }}"
+    parameters:
+      properties:
+        addressSpace:
+          addressPrefixes:
+            - 10.0.0.0/16
+        flowTimeoutInMinutes: 10
+      location: eastus
+  subnet_1:
+    provider: Microsoft.Network
+    type: virtualNetworks
+    name: resource:vnet_1.name
+    subresource:
+      - type: subnets
+        name: test-subnet-01
+    resourceGroupName: "{{ resource_group }}"
+    api-version: "2022-07-01"
+    parameters:
+      properties:
+        addressPrefix: 10.0.0.0/24

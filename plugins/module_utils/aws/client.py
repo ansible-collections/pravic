@@ -16,8 +16,9 @@ except ImportError:
     BOTO3_IMP_ERR = traceback.format_exc()
     HAS_BOTO3 = False
 
-from ansible.module_utils.basic import missing_required_lib
+from ansible.module_utils.basic import missing_required_lib, to_native
 from ansible_collections.pravic.pravic.plugins.module_utils.resource import CloudClient
+from ansible_collections.pravic.pravic.plugins.module_utils.exception import CloudException
 
 
 class JsonPatch(list):
@@ -91,10 +92,11 @@ class Discoverer:
         try:
             result = self.client.describe_type(Type="RESOURCE", TypeName=type_name)
         except self.client.exceptions.TypeNotFoundException as e:
-            raise Exception(e, "Invalid TypeName")
+            raise CloudException("Invalid TypeName: {0}".format(to_native(e)))
         return ResourceType(json.loads(result["Schema"]))
 
 
+<<<<<<< HEAD
 class AwsBotocoreError(Exception):
     def __init__(self, exc, msg):
         self.exc = exc
@@ -102,10 +104,18 @@ class AwsBotocoreError(Exception):
         super().__init__(self.msg)
 
 
+=======
+>>>>>>> fdb2d5a (add integration tests)
 class AwsClient(CloudClient):
     def __init__(self, check_mode=False, **kwargs) -> None:
         if not HAS_BOTO3:
+<<<<<<< HEAD
             raise AwsBotocoreError(msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR)
+=======
+            raise CloudException(
+                missing_required_lib("boto3 and botocore")
+            )
+>>>>>>> fdb2d5a (add integration tests)
 
         self.check_mode = check_mode
         self.session = boto3.session.Session(**kwargs)
@@ -154,7 +164,7 @@ class AwsClient(CloudClient):
             try:
                 self._wait(response["ProgressEvent"]["RequestToken"])
             except botocore.exceptions.WaiterError as e:
-                raise Exception(e.last_response["ProgressEvent"]["StatusMessage"])
+                raise CloudException(e.last_response["ProgressEvent"]["StatusMessage"])
             result = self._get_resource(resource)
         return self.make_result(changed, result, msg)
 

@@ -3,6 +3,7 @@ from typing import Any, Dict, Tuple
 import copy
 import uuid
 
+from ansible.module_utils.basic import to_native
 from ansible_collections.pravic.pravic.plugins.module_utils.azure.credentials import AzureCredentials
 
 try:
@@ -17,8 +18,24 @@ try:
 except ImportError:
     pass
 
-from ansible_collections.pravic.pravic.plugins.module_utils.resource import CloudClient
 from ansible.module_utils.common.dict_transformations import dict_merge
+from ansible_collections.pravic.pravic.plugins.module_utils.resource import CloudClient
+from ansible_collections.pravic.pravic.plugins.module_utils.exception import CloudException
+
+
+def dict_merge(a, b):
+    '''recursively merges dicts. not just simple a['key'] = b['key'], if
+    both a and b have a key whose value is a dict then dict_merge is called
+    on both values and the result stored in the returned dictionary.'''
+    if not isinstance(b, dict):
+        return b
+    result = copy.deepcopy(a)
+    for k, v in b.items():
+        if k in result and isinstance(result[k], dict):
+            result[k] = dict_merge(result[k], v)
+        else:
+            result[k] = copy.deepcopy(v)
+    return result
 
 
 class AzureRestClient(object):
@@ -87,7 +104,7 @@ class AzureRestClient(object):
         if response.status_code not in expected_status_codes:
             exp = CloudError(response)
             exp.request_id = response.headers.get('x-ms-request-id')
-            raise exp
+            raise CloudException(to_native(exp))
         elif response.status_code == 202 and polling_timeout > 0:
             def get_long_running_output(response):
                 return response
@@ -149,7 +166,7 @@ class AzureClient(CloudClient):
 
         return api_version
 
-    def _get_existing_resource(self, resource: str) -> Tuple[str, str, Dict]:
+    def _get_existing_resource(self, resource: Dict) -> Tuple[str, str, Dict]:
 
         existing = {}
         url = self._get_resource_url(resource)
@@ -199,11 +216,11 @@ class AzureClient(CloudClient):
                 existing = json.loads(response.text)
             except Exception:
                 existing = response.text
-        return {"changed": True, **existing}
+        return {"changed": changed, **existing}
 
     def absent(self, resource: Dict) -> Dict:
         api_version, resource_url, existing = self._get_existing_resource(resource)
         changed = bool(existing)
         if changed and not self.check_mode:
             self._query_resource("DELETE", api_version, resource_url, {}, status_code=[204])
-        return {"changed": True, **existing}
+        return {"changed": changed, **existing}
