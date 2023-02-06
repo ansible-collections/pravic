@@ -68,7 +68,6 @@ def aws_client():
 
     class AwsClientMock(AwsClient):
         def __init__(self):
-
             self.session = Mock()
             self.client = MagicMock()
             self.resources = Mock()
@@ -86,9 +85,7 @@ def discoverer():
 
     instance_discoverer = Discoverer(Mock())
     instance_discoverer.client = MagicMock()
-    instance_discoverer.client.describe_type.return_value = {
-        "Schema": json.dumps(SCHEMA)
-    }
+    instance_discoverer.client.describe_type.return_value = {"Schema": json.dumps(SCHEMA)}
     instance_discoverer.client.exceptions.TypeNotFoundException = NotFound
     return instance_discoverer
 
@@ -129,9 +126,7 @@ def test_present_create_resource(get_resource, aws_client, mock_resource_type):
     ]
 
     result = aws_client.present(RESOURCE)
-    aws_client.client.create_resource.assert_called_once_with(
-        TypeName=res_type.type_name, DesiredState=json.dumps(res_type.properties)
-    )
+    aws_client.client.create_resource.assert_called_once_with(TypeName=res_type.type_name, DesiredState=json.dumps(res_type.properties))
     assert result == RESPONSE_OP_CREATE
 
 

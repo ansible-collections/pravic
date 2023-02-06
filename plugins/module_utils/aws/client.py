@@ -104,11 +104,8 @@ class AwsBotocoreError(Exception):
 
 class AwsClient(CloudClient):
     def __init__(self, check_mode=False, **kwargs) -> None:
-
         if not HAS_BOTO3:
-            raise AwsBotocoreError(
-                msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR
-            )
+            raise AwsBotocoreError(msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR)
 
         self.check_mode = check_mode
         self.session = boto3.session.Session(**kwargs)
@@ -165,11 +162,7 @@ class AwsClient(CloudClient):
         msg = "Skipped"
         changed = False
         patch = JsonPatch()
-        filtered = {
-            k: v
-            for k, v in desired.properties.items()
-            if k not in desired.read_only_properties
-        }
+        filtered = {k: v for k, v in desired.properties.items() if k not in desired.read_only_properties}
         for k, v in filtered.items():
             if k not in existing.properties:
                 patch.append(op("add", k, v))
@@ -191,9 +184,7 @@ class AwsClient(CloudClient):
         msg = "Deleted"
         changed = True
         if not self.check_mode:
-            result = self.client.delete_resource(
-                TypeName=resource.type_name, Identifier=resource.identifier
-            )
+            result = self.client.delete_resource(TypeName=resource.type_name, Identifier=resource.identifier)
             self._wait(result["ProgressEvent"]["RequestToken"])
         return self.make_result(changed, resource, msg)
 

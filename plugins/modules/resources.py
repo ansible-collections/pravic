@@ -99,9 +99,7 @@ ARG_SPEC = {
 
 def main():
     module = AnsibleModule(argument_spec=ARG_SPEC, supports_check_mode=True)
-    client = AwsClient(
-        check_mode=module.check_mode, **module.params.get("connection") or {}
-    )
+    client = AwsClient(check_mode=module.check_mode, **module.params.get("connection") or {})
     result = client.run(
         module.params.get("resources", []),
         module.params.get("current_state", {}),
