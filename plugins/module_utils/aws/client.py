@@ -147,12 +147,12 @@ class AwsClient(CloudClient):
         if self.check_mode:
             result = resource
         else:
-            result = self.client.create_resource(
+            response = self.client.create_resource(
                 TypeName=resource.type_name,
                 DesiredState=json.dumps(resource.properties),
             )
             try:
-                self._wait(result["ProgressEvent"]["RequestToken"])
+                self._wait(response["ProgressEvent"]["RequestToken"])
             except botocore.exceptions.WaiterError as e:
                 raise Exception(e.last_response["ProgressEvent"]["StatusMessage"])
             result = self._get_resource(resource)
