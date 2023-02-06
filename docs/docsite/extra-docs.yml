@@ -1,0 +1,5 @@
+---
+sections:
+  - title: Specification format for storing resource state
+    toctree:
+      - stored_state_schema
