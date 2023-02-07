@@ -37,7 +37,7 @@ def test_get_value(data, path, expected):
     if expected:
         assert expected == get_value(data, path)
     else:
-        with pytest.raises(KeyError):
+        with pytest.raises(TypeError):
             get_value(data, path)
 
 
@@ -92,10 +92,7 @@ def test_resolve_refs_with_check_mode(m_replace_reference):
 
     context = {}
 
-    def raise_key_error():
-        return KeyError("missing key from dictionnary")
-
-    m_replace_reference.side_effect = raise_key_error()
+    m_replace_reference.side_effect = KeyError("missing key from dictionnary")
     check_mode = True
 
     node = {"a": "resource:s1.a"}
@@ -152,7 +149,6 @@ def test_cloudclient_sort_resources(cloudclient, state, desired_state, expected)
             sorter.done(name)
     if state == "absent":
         expected.reverse()
-    print(f"Expected: {expected} - Result: {result}")
     assert expected == result
 
 

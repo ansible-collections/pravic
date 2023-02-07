@@ -28,10 +28,7 @@ REREG = re.compile(r"resource:((\w+)\S+)")
 def get_value(data, path):
     while path:
         key = path.pop(0)
-        if isinstance(data, dict) and key in data:
-            data = data[key]
-        else:
-            raise KeyError(f"{data} is not of type dict or does not contain key {key}")
+        data = data[key]
     return data
 
 
