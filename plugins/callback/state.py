@@ -17,7 +17,7 @@ from ansible.plugins.callback import CallbackBase
 
 class CallbackModule(CallbackBase):
     CALLBACK_VERSION = 2.0
-    CALLBACK_NAME = "cloud.pravic.state"
+    CALLBACK_NAME = "pravic.pravic.state"
     CALLBACK_TYPE = "aggregate"
 
     def __init__(self, display=None, options=None):

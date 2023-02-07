@@ -2,7 +2,7 @@
 
 set -eux
 
-export ANSIBLE_CALLBACKS_ENABLED="cloud.pravic.state"
+export ANSIBLE_CALLBACKS_ENABLED="pravic.pravic.state"
 
 STATE_FILE="state.json"
 trap 'rm -rvf "${STATE_FILE}"' EXIT
