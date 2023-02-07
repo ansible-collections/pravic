@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch, call
 import pytest
 from typing import Dict, List
 
-from ansible_collections.cloud.pravic.plugins.module_utils.resource import (
+from ansible_collections.pravic.pravic.plugins.module_utils.resource import (
     get_value,
     replace_reference,
     REREG,
@@ -14,7 +14,7 @@ from ansible_collections.cloud.pravic.plugins.module_utils.resource import (
     ResourceExceptionError,
 )
 
-PATCH_BASE_PATH = "ansible_collections.cloud.pravic.plugins.module_utils.resource."
+PATCH_BASE_PATH = "ansible_collections.pravic.pravic.plugins.module_utils.resource."
 
 
 @pytest.mark.parametrize(
