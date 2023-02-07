@@ -5,7 +5,7 @@ import concurrent.futures
 import functools
 import operator
 import re
-from graphlib import TopologicalSorter
+from graphlib import TopologicalSorter, CycleError
 import traceback
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Any
@@ -28,7 +28,10 @@ REREG = re.compile(r"resource:((\w+)\S+)")
 def get_value(data, path):
     while path:
         key = path.pop(0)
-        data = data[key]
+        if isinstance(data, dict) and key in data:
+            data = data[key]
+        else:
+            raise KeyError(f"{data} is not of type dict or does not contain key {key}")
     return data
 
 
@@ -60,7 +63,7 @@ class ResourceExceptionError(Exception):
     def __init__(self, exc, msg):
         self.exc = exc
         self.msg = msg
-        super().__init__(self)
+        super().__init__(self.msg)
 
 
 class CloudClient(metaclass=ABCMeta):
@@ -75,13 +78,14 @@ class CloudClient(metaclass=ABCMeta):
     def absent(self, resource: Dict) -> Dict:
         pass
 
-    def run(self, desired_state, current_state, state, check_mode):
-
+    @staticmethod
+    def has_pyyaml() -> None:
         if not HAS_PYYAML:
             raise ResourceExceptionError(
                 msg=missing_required_lib("PyYAML"), exc=PYYAML_IMP_ERR
             )
 
+    def sort_resources(self, desired_state: Dict, state: str) -> TopologicalSorter:
         sorter = TopologicalSorter()
         for name, resource in desired_state.items():
             if state == "present":
@@ -96,7 +100,20 @@ class CloudClient(metaclass=ABCMeta):
                 ):
                     sorter.add(item, name)
 
-        sorter.prepare()
+        try:
+            sorter.prepare()
+        except CycleError as err:
+            raise ResourceExceptionError(
+                msg="nodes are in circle", exc=err
+            )
+
+        return sorter
+
+    def run(self, desired_state, current_state, state, check_mode):
+
+        self.has_pyyaml()
+        sorter = self.sort_resources(desired_state, state)
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             current_state["changed"] = False
             while sorter:

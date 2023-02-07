@@ -99,7 +99,7 @@ class AwsBotocoreError(Exception):
     def __init__(self, exc, msg):
         self.exc = exc
         self.msg = msg
-        super().__init__(self)
+        super().__init__(self.msg)
 
 
 class AwsClient(CloudClient):
