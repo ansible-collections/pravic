@@ -1,9 +1,0 @@
-resources:
-  namespace_1:
-    kind: Namespace
-    apiVersion: v1
-    metadata:
-      name: ansible
-required_libs:
-  - kubernetes>=12.0.0
-  - requests-oauthlib

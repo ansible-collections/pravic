@@ -1,0 +1,22 @@
+- hosts: kubernetes
+  gather_facts: false
+
+  collections:
+    - pravic.pravic
+
+  tasks:
+    - name: Create kubernetes resources
+      pravic.pravic.resources:
+        state: "present"
+        resources:
+          namespace_1:
+            kind: Namespace
+            apiVersion: v1
+            metadata:
+              name: ansible
+      register: _create
+
+    - name: assert namespace has been created
+      assert:
+        that:
+          - _create is changed

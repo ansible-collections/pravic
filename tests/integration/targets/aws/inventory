@@ -1,6 +1,10 @@
 [tests]
-localhost
+amazon
 
 [all:vars]
-ansible_connection=local
+ansible_connection=pravic.pravic.aws
 ansible_python_interpreter="{{ ansible_playbook_python }}"
+ansible_aws_access_key_id="{{ aws_access_key }}"
+ansible_aws_secret_access_key="{{ aws_secret_key }}"
+ansible_aws_session_token="{{ security_token | default(omit) }}"
+ansible_aws_region_name="{{ aws_region | default('us-east-1') }}"
