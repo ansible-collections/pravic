@@ -113,7 +113,7 @@ DOCUMENTATION = r"""
         aliases: [ k8s_verify_ssl ]
 """
 
-from ansible_collections.cloud.pravic.plugins.plugin_utils.connection import CloudConnectionBase
+from ansible_collections.pravic.pravic.plugins.plugin_utils.connection import CloudConnectionBase
 
 
 class Connection(CloudConnectionBase):

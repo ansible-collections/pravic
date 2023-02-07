@@ -13,7 +13,7 @@ except ImportError:
     HAS_K8S_CLIENT = False
 
 from ansible.module_utils.basic import missing_required_lib
-from ansible_collections.cloud.pravic.plugins.module_utils.resource import CloudClient
+from ansible_collections.pravic.pravic.plugins.module_utils.resource import CloudClient
 
 
 AUTH_ARGS = (

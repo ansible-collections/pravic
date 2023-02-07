@@ -52,7 +52,7 @@ DOCUMENTATION = r"""
           - name: AWS_CONFIG_PROFILE_NAME
 """
 
-from ansible_collections.cloud.pravic.plugins.plugin_utils.connection import CloudConnectionBase
+from ansible_collections.pravic.pravic.plugins.plugin_utils.connection import CloudConnectionBase
 
 
 class Connection(CloudConnectionBase):
