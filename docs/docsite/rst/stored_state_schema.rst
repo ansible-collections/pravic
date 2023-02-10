@@ -9,7 +9,7 @@ This resource state specification is provider-agnostic and allows some resource 
 
 The format for storing resource state should be something like:
 
-```yaml
+```json
 
     [{
         "ResourceGroupName":{
@@ -19,7 +19,7 @@ The format for storing resource state should be something like:
         "State": {
           "description":"Dictionary of metadata for ResourceGroupName.",
           "type":"object",
-          "properties": {
+          "patternProperties": {
               "Created": {
                   "description":"Date and time in RFC3339 format that the ResourceGroup was created.",
                   "type":"date"
@@ -31,18 +31,17 @@ The format for storing resource state should be something like:
               "ResourceGroup": {
                   "description":"The unique identifier for a group of resources.",
                   "type":"string"
-              },
-              <anything else we think makes sense>
+              }
           }
         },
         "Resources":{
             "description":"Dictionary of resources belonging to ResourceGroupName.",
             "type":"object",
-            "properties": {
+            "patternProperties": {
                 "ResourceName":{
                     "description":"ResourceName is the unique identifier for a resource.",
                     "type":"object",
-                    "properties": {
+                    "patternProperties": {
                       "Resource":{
                           "description":"Resource specific information.",
                           "type":"object"
@@ -60,14 +59,13 @@ Example of Storing Resource State
 
 For the sake of simplicity, an example of storing resource state definition for AWS provider might look something like this:
 
-```yaml
+```json
     [{
         "ResourceGroupName": "cloud_1",
         "State": {
             "Created": "Mon, 05 Dec 2022 15:56:44 GMT",
             "Modified": "Mon, 05 Dec 2022 15:56:44 GMT",
             "ResourceGroup": "cloud_1",
-            <anything else we think makes sense here>
           },
         "Resources":{
           "bucket_02": {
@@ -102,7 +100,6 @@ For the sake of simplicity, an example of storing resource state definition for 
               "Created": "Mon, 05 Dec 2022 15:56:44 GMT",
               "Modified": "Mon, 05 Dec 2022 15:56:44 GMT",
               "ResourceGroup": "cloud_2",
-              <anything else we think makes sense here>
           },
           "Resources":{
                   ...
