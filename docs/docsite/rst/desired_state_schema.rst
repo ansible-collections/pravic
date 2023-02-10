@@ -3,7 +3,7 @@
 YAML specification for defining desired resource state
 ======================================================
 
-The users who intend to use the `cloud.pravic Collection <https://github.com/ansible-collections/pravic>`_ to provision/deprovision Cloud resources will need to use this YAML specification for defining desired resource state:
+The users who intend to use the `pravic.pravic Collection <https://github.com/ansible-collections/pravic>`_ to provision/deprovision Cloud resources will need to use this YAML specification for defining desired resource state:
 
 ```yaml
   ResourceGroups:
@@ -18,9 +18,9 @@ The users who intend to use the `cloud.pravic Collection <https://github.com/ans
       Resources:
         description: Dictionary of resources belonging to ResourceGroupName.
         type: object
-        properties:
+        patternProperties:
           name:
-            description: The unique identifier for a resource. It is a hash map with the name as the key."
+            description: The locally unique identifier for a resource. It is a hash map with the name as the key."
             type: object
             properties:
               resource:
