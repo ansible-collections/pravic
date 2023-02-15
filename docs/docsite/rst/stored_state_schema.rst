@@ -35,19 +35,13 @@ The format for storing resource state should be something like:
           }
         },
         "Resources":{
-            "description":"Dictionary of resources belonging to ResourceGroupName.",
+            "description":"Dictionary of resources belonging to ResourceGroupName. Each key is a locally unique identifier mapping to a cloud provider resource definition.",
             "type":"object",
             "patternProperties": {
-                "ResourceName":{
-                    "description":"ResourceName is the unique identifier for a resource.",
-                    "type":"object",
-                    "patternProperties": {
-                      "Resource":{
-                          "description":"Resource specific information.",
-                          "type":"object"
-                      }
-                  }
-              }
+                "^.+$": {
+                    description: The cloud provider resource definition.
+                    type: object
+                }
             }
         }
     }]
