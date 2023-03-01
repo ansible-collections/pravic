@@ -93,14 +93,11 @@ class CloudClient(metaclass=ABCMeta):
         try:
             sorter.prepare()
         except CycleError as err:
-            raise ResourceExceptionError(
-                msg="nodes are in circle", exc=err
-            )
+            raise ResourceExceptionError(msg="nodes are in circle", exc=err)
 
         return sorter
 
     def run(self, desired_state, current_state, state, check_mode):
-
         self.has_pyyaml()
         sorter = self.sort_resources(desired_state, state)
 
