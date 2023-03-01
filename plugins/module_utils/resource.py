@@ -81,7 +81,7 @@ class CloudClient(metaclass=ABCMeta):
             raise ResourceExceptionError(msg=missing_required_lib("PyYAML"), exc=PYYAML_IMP_ERR)
 
     def sort_resources(self, desired_state: Dict, state: str) -> TopologicalSorter:
-        sorter = TopologicalSorter()
+        sorter: TopologicalSorter = TopologicalSorter()
         for name, resource in desired_state.items():
             if state == "present":
                 sorter.add(name, *map(operator.itemgetter(1), REREG.findall(yaml.dump(resource))))
