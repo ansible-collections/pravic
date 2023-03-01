@@ -104,11 +104,8 @@ class AwsBotocoreError(Exception):
 
 class AwsClient(CloudClient):
     def __init__(self, check_mode=False, **kwargs) -> None:
-
         if not HAS_BOTO3:
-            raise AwsBotocoreError(
-                msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR
-            )
+            raise AwsBotocoreError(msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR)
 
         self.check_mode = check_mode
         self.session = boto3.session.Session(**kwargs)
@@ -136,12 +133,8 @@ class AwsClient(CloudClient):
         return result
 
     def _get_resource(self, resource: Resource) -> Resource:
-        result = self.client.get_resource(
-            TypeName=resource.type_name, Identifier=resource.identifier
-        )
-        return resource.resource_type.make(
-            json.loads(result["ResourceDescription"]["Properties"])
-        )
+        result = self.client.get_resource(TypeName=resource.type_name, Identifier=resource.identifier)
+        return resource.resource_type.make(json.loads(result["ResourceDescription"]["Properties"]))
 
     @staticmethod
     def make_result(changed: bool, result: Resource, msg: str) -> Dict:
@@ -154,12 +147,12 @@ class AwsClient(CloudClient):
         if self.check_mode:
             result = resource
         else:
-            result = self.client.create_resource(
+            response = self.client.create_resource(
                 TypeName=resource.type_name,
                 DesiredState=json.dumps(resource.properties),
             )
             try:
-                self._wait(result["ProgressEvent"]["RequestToken"])
+                self._wait(response["ProgressEvent"]["RequestToken"])
             except botocore.exceptions.WaiterError as e:
                 raise Exception(e.last_response["ProgressEvent"]["StatusMessage"])
             result = self._get_resource(resource)
@@ -169,11 +162,7 @@ class AwsClient(CloudClient):
         msg = "Skipped"
         changed = False
         patch = JsonPatch()
-        filtered = {
-            k: v
-            for k, v in desired.properties.items()
-            if k not in desired.read_only_properties
-        }
+        filtered = {k: v for k, v in desired.properties.items() if k not in desired.read_only_properties}
         for k, v in filtered.items():
             if k not in existing.properties:
                 patch.append(op("add", k, v))
@@ -195,9 +184,7 @@ class AwsClient(CloudClient):
         msg = "Deleted"
         changed = True
         if not self.check_mode:
-            result = self.client.delete_resource(
-                TypeName=resource.type_name, Identifier=resource.identifier
-            )
+            result = self.client.delete_resource(TypeName=resource.type_name, Identifier=resource.identifier)
             self._wait(result["ProgressEvent"]["RequestToken"])
         return self.make_result(changed, resource, msg)
 

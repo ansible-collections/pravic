@@ -78,36 +78,26 @@ class CloudClient(metaclass=ABCMeta):
     @staticmethod
     def has_pyyaml() -> None:
         if not HAS_PYYAML:
-            raise ResourceExceptionError(
-                msg=missing_required_lib("PyYAML"), exc=PYYAML_IMP_ERR
-            )
+            raise ResourceExceptionError(msg=missing_required_lib("PyYAML"), exc=PYYAML_IMP_ERR)
 
     def sort_resources(self, desired_state: Dict, state: str) -> TopologicalSorter:
-        sorter = TopologicalSorter()
+        sorter: TopologicalSorter = TopologicalSorter()
         for name, resource in desired_state.items():
             if state == "present":
-                sorter.add(
-                    name,
-                    *map(operator.itemgetter(1), REREG.findall(yaml.dump(resource)))
-                )
+                sorter.add(name, *map(operator.itemgetter(1), REREG.findall(yaml.dump(resource))))
             elif state == "absent":
                 sorter.add(name)
-                for item in map(
-                    operator.itemgetter(1), REREG.findall(yaml.dump(resource))
-                ):
+                for item in map(operator.itemgetter(1), REREG.findall(yaml.dump(resource))):
                     sorter.add(item, name)
 
         try:
             sorter.prepare()
         except CycleError as err:
-            raise ResourceExceptionError(
-                msg="nodes are in circle", exc=err
-            )
+            raise ResourceExceptionError(msg="nodes are in circle", exc=err)
 
         return sorter
 
     def run(self, desired_state, current_state, state, check_mode):
-
         self.has_pyyaml()
         sorter = self.sort_resources(desired_state, state)
 
@@ -117,17 +107,13 @@ class CloudClient(metaclass=ABCMeta):
                 futures = {}
                 for name in sorter.get_ready():
                     if state == "present":
-                        node = resolve_refs(
-                            desired_state[name], current_state, check_mode
-                        )
+                        node = resolve_refs(desired_state[name], current_state, check_mode)
                         futures[executor.submit(self.present, node)] = name
                     elif state == "absent":
                         if name not in current_state:
                             sorter.done(name)
                             continue
-                        node = resolve_refs(
-                            desired_state[name], current_state, check_mode
-                        )
+                        node = resolve_refs(desired_state[name], current_state, check_mode)
                         futures[executor.submit(self.absent, node)] = name
                 for future in concurrent.futures.as_completed(futures):
                     result = future.result()

@@ -21,17 +21,9 @@ PATCH_BASE_PATH = "ansible_collections.pravic.pravic.plugins.module_utils.resour
     "data,path,expected",
     [
         ({"a": "value_a"}, ["a"], "value_a"),
-        (
-            {"parent_a": {"child_1": "value_a_1", "child_2": "value_a_2"}},
-            ["parent_a", "child_1"],
-            "value_a_1"
-        ),
-        (
-            {"parent_a": {"child_1": "value_a_1", "child_2": "value_a_2"}},
-            ["parent_a", "child_1", "another_child"],
-            None
-        ),
-    ]
+        ({"parent_a": {"child_1": "value_a_1", "child_2": "value_a_2"}}, ["parent_a", "child_1"], "value_a_1"),
+        ({"parent_a": {"child_1": "value_a_1", "child_2": "value_a_2"}}, ["parent_a", "child_1", "another_child"], None),
+    ],
 )
 def test_get_value(data, path, expected):
     if expected:
@@ -56,14 +48,13 @@ def test_replace_reference(m_get_value, data):
     "node,expected",
     [
         ({"a": "resource:s1.a"}, {"a": "s1_value_a"}),
-        ({"a": "resource:s1.a", "b": "resource:s2.b"}, {'a': 's1_value_a', 'b': 's2_value_b'}),
-        ({"c": ["resource:s1.a", "resource:s2.b"]}, {'c': ['s1_value_a', 's2_value_b']}),
+        ({"a": "resource:s1.a", "b": "resource:s2.b"}, {"a": "s1_value_a", "b": "s2_value_b"}),
+        ({"c": ["resource:s1.a", "resource:s2.b"]}, {"c": ["s1_value_a", "s2_value_b"]}),
         ({"a": "resource:s1.c"}, None),
-    ]
+    ],
 )
 @patch(PATCH_BASE_PATH + "replace_reference")
 def test_resolve_refs(m_replace_reference, node, expected):
-
     context = {
         "s1": {"a": "s1_value_a", "b": "s1_value_b"},
         "s2": {"a": "s2_value_a", "b": "s2_value_b"},
@@ -89,7 +80,6 @@ def test_resolve_refs(m_replace_reference, node, expected):
 
 @patch(PATCH_BASE_PATH + "replace_reference")
 def test_resolve_refs_with_check_mode(m_replace_reference):
-
     context = {}
 
     m_replace_reference.side_effect = KeyError("missing key from dictionnary")
@@ -102,9 +92,7 @@ def test_resolve_refs_with_check_mode(m_replace_reference):
 
 @pytest.fixture()
 def cloudclient():
-
     class TestCloudClient(CloudClient):
-
         def present(self, resource: Dict) -> Dict:
             pass
 
@@ -122,25 +110,11 @@ def cloudclient():
 @pytest.mark.parametrize(
     "desired_state,expected",
     [
-        (
-            {
-                "r1": {"name": "resource:r2.r1_name"},
-                "r2": {"r1_name": "value1", "name": "value2"}
-            },
-            ["r2", "r1"]
-        ),
-        (
-            {
-                "r1": {"name": "resource:r2.r1_name"},
-                "r2": {"r1_name": "value1", "name": "resource:r3.r2_name"},
-                "r3": {"r2_name": "value2"}
-            },
-            ["r3", "r2", "r1"]
-        ),
-    ]
+        ({"r1": {"name": "resource:r2.r1_name"}, "r2": {"r1_name": "value1", "name": "value2"}}, ["r2", "r1"]),
+        ({"r1": {"name": "resource:r2.r1_name"}, "r2": {"r1_name": "value1", "name": "resource:r3.r2_name"}, "r3": {"r2_name": "value2"}}, ["r3", "r2", "r1"]),
+    ],
 )
 def test_cloudclient_sort_resources(cloudclient, state, desired_state, expected):
-
     sorter = cloudclient.sort_resources(desired_state, state)
     result = []
     while sorter:
@@ -154,11 +128,7 @@ def test_cloudclient_sort_resources(cloudclient, state, desired_state, expected)
 
 @pytest.mark.parametrize("state", ["present", "absent"])
 def test_cloudclient_sort_resources_with_circle(cloudclient, state):
-
-    desired_state = {
-        "r1": {"name": "resource:r2.r1_name", "alias": "resource1"},
-        "r2": {"r1_name": "resource:r1.alias", "name": "value2"}
-    }
+    desired_state = {"r1": {"name": "resource:r2.r1_name", "alias": "resource1"}, "r2": {"r1_name": "resource:r1.alias", "name": "value2"}}
 
     with pytest.raises(ResourceExceptionError):
         cloudclient.sort_resources(desired_state, state)
@@ -166,11 +136,7 @@ def test_cloudclient_sort_resources_with_circle(cloudclient, state):
 
 @pytest.mark.parametrize("state", ["present"])
 def test_cloudclient_run_present(cloudclient, state):
-
-    desired_state = {
-        "child": {"ref": "resource:parent.id"},
-        "parent": {}
-    }
+    desired_state = {"child": {"ref": "resource:parent.id"}, "parent": {}}
 
     cloudclient.present = MagicMock()
     cloudclient.present.side_effect = [
@@ -196,7 +162,8 @@ def test_cloudclient_run_present(cloudclient, state):
         }
         cloudclient.present.assert_has_calls(
             [
-                call({}), call({"ref": "id1"}),
+                call({}),
+                call({"ref": "id1"}),
             ]
         )
     elif state == "absent":
@@ -210,11 +177,7 @@ def test_cloudclient_run_present(cloudclient, state):
 
 
 def test_cloudclient_run_present_with_checkmode(cloudclient):
-
-    desired_state = {
-        "child": {"ref": "resource:parent.id"},
-        "parent": {}
-    }
+    desired_state = {"child": {"ref": "resource:parent.id"}, "parent": {}}
 
     cloudclient.present = MagicMock()
     cloudclient.present.side_effect = lambda src: {"changed": True, **src}
@@ -232,6 +195,7 @@ def test_cloudclient_run_present_with_checkmode(cloudclient):
 
     cloudclient.present.assert_has_calls(
         [
-            call({}), call({"ref": "resource:parent.id"}),
+            call({}),
+            call({"ref": "resource:parent.id"}),
         ]
     )

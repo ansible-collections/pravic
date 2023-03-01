@@ -52,9 +52,7 @@ def test_resource_type_empty_schema():
 
 
 def test_resource(mock_resource_type):
-    resource = Resource(
-        resource=RESOURCE["Properties"], resource_type=mock_resource_type
-    )
+    resource = Resource(resource=RESOURCE["Properties"], resource_type=mock_resource_type)
     assert isinstance(resource, Resource)
     assert resource.type_name == "AWS::IAM::Role"
     assert resource.identifier == "eda-test-role"
@@ -70,7 +68,6 @@ def aws_client():
 
     class AwsClientMock(AwsClient):
         def __init__(self):
-
             self.session = Mock()
             self.client = MagicMock()
             self.resources = Mock()
@@ -88,9 +85,7 @@ def discoverer():
 
     instance_discoverer = Discoverer(Mock())
     instance_discoverer.client = MagicMock()
-    instance_discoverer.client.describe_type.return_value = {
-        "Schema": json.dumps(SCHEMA)
-    }
+    instance_discoverer.client.describe_type.return_value = {"Schema": json.dumps(SCHEMA)}
     instance_discoverer.client.exceptions.TypeNotFoundException = NotFound
     return instance_discoverer
 
@@ -104,11 +99,9 @@ def test_discoverer(discoverer, mock_resource_type):
 
 
 def test_discoverer_invalid_type(discoverer):
-    discoverer.client.describe_type.side_effect = (
-        discoverer.client.exceptions.TypeNotFoundException
-    )
+    discoverer.client.describe_type.side_effect = discoverer.client.exceptions.TypeNotFoundException
     with pytest.raises(Exception) as e:
-        _result = discoverer.get("AWS::IMA::Role")
+        discoverer.get("AWS::IMA::Role")
 
     assert "Invalid TypeName" in str(e.value)
 
@@ -129,15 +122,11 @@ def test_present_create_resource(get_resource, aws_client, mock_resource_type):
 
     get_resource.side_effect = [
         aws_client.client.exceptions.ResourceNotFoundException,
-        res_type.resource_type.make(
-            json.loads(RESPONSE_GET["ResourceDescription"]["Properties"])
-        ),
+        res_type.resource_type.make(json.loads(RESPONSE_GET["ResourceDescription"]["Properties"])),
     ]
 
     result = aws_client.present(RESOURCE)
-    aws_client.client.create_resource.assert_called_once_with(
-        TypeName=res_type.type_name, DesiredState=json.dumps(res_type.properties)
-    )
+    aws_client.client.create_resource.assert_called_once_with(TypeName=res_type.type_name, DesiredState=json.dumps(res_type.properties))
     assert result == RESPONSE_OP_CREATE
 
 

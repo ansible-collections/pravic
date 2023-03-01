@@ -22,6 +22,4 @@ class ActionModule(ActionBase):
             current_state = {}
 
         module_args["current_state"] = current_state
-        return self._execute_module(
-            module_name=self._task.action, module_args=module_args, task_vars=task_vars
-        )
+        return self._execute_module(module_name=self._task.action, module_args=module_args, task_vars=task_vars)
