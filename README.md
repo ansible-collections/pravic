@@ -57,24 +57,62 @@ The process of decision making in this collection is based on discussing and fin
 
 Every voice is important. If you have something on your mind, create an issue or dedicated discussion and let's discuss it!
 
-## Tested with Ansible
-
-<!-- List the versions of Ansible the collection has been tested with. Must match what is in galaxy.yml. -->
-
-## External requirements
-
-<!-- List any external resources the collection depends on, for example minimum versions of an OS, libraries, or utilities. Do not list other Ansible collections here. -->
-
-### Supported connections
-<!-- Optional. If your collection supports only specific connection types (such as HTTPAPI, netconf, or others), list them here. -->
-
-## Included content
-
-<!-- Galaxy will eventually list the module docs within the UI, but until that is ready, you may need to either describe your plugins etc here, or point to an external docsite to cover that information. -->
-
 ## Using this collection
 
-<!--Include some quick examples that cover the most common use cases for your collection content. It can include the following examples of installation and upgrade (change NAMESPACE.COLLECTION_NAME correspondingly):-->
+The `pravic.pravic` collection enables use of ansible-playbook to manage a set of resources which have been declared in a `resources.yml` file.  
+
+Given a `playbook.yml` file of:
+
+```yaml
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - resources.yml
+  tasks:
+    - name: cloud_1
+      pravic.pravic.resources:
+        state: "{{ state | default('present') }}"
+        connection:
+          profile_name: content
+
+    - name: cloud_2
+      pravic.pravic.resources:
+        state: "{{ state | default('present') }}"
+        connection:
+          profile_name: content
+```
+
+And a `resources.yaml` file:
+
+```yaml
+pravic.pravic.resources/cloud_1:
+  - name: bucket_01
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ansible-declared-state-01
+      Tags:
+        - Key: otherbucket
+          Value: resource:bucket_02.Properties.Arn
+
+  - name: bucket_02
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ansible-declared-state-02
+
+  - name: bucket_03
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ansible-declared-state-03
+
+pravic.pravic.resources/cloud_2:
+  - name: bucket_01
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ansible-declared-state-04
+```
+
+Executing `ansible-playbook playbook.yml` with a set of valid AWS credentials would create the specified S3 buckets.  Notably, the resource named `bucket_01` depends on the ARN of `bucket_02`.  The pravic collection will [resolve references](https://github.com/ansible-collections/pravic/blob/main/plugins/module_utils/resource.py) between resources and determine the correct order to execute API calls to create resources in as well as automatically supplying the value without the playbook author needing to include a task to query the S3 API for the bucket info and register the ARN as an Ansible variable.
 
 ## Release notes
 
