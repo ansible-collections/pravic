@@ -18,7 +18,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket
+                BucketName: "{{ resource_prefix }}-s3-bucket"
                 Tags:
                   - Key: bucket
                     Value: "Pravic"
@@ -39,7 +39,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket
+                BucketName: "{{ resource_prefix }}-s3-bucket"
                 Tags:
                   - Key: bucket
                     Value: "Pravic"
@@ -57,7 +57,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket
+                BucketName: "{{ resource_prefix }}-s3-bucket"
                 ObjectOwnership: ObjectWriter
         check_mode: true
         register: _result
@@ -76,7 +76,7 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket
+                BucketName: "{{ resource_prefix }}-s3-bucket"
         check_mode: true
         register: _result
 
@@ -94,13 +94,13 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket
+                BucketName: "{{ resource_prefix }}-s3-bucket"
         register: _result
 
       - assert:
           that:
           - _result is successful
-      
+
       - name: Create a bunch of S3 buckets with interdependency - check_mode=True
         pravic.pravic.resources:
           state: "present"
@@ -109,17 +109,17 @@
             pravic_s3_bucket_2:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket-2
+                BucketName: "{{ resource_prefix }}-s3-bucket-2"
             pravic_s3_bucket_3:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket-3
+                BucketName: "{{ resource_prefix }}-s3-bucket-3"
                 Tags:
                   - Key: OtherArn
                     Value: resource:pravic_s3_bucket_2.Properties.Arn
         check_mode: true
         register: _result
-      
+
       - assert:
           that:
           - _result is successful
@@ -133,12 +133,12 @@
             pravic_s3_bucket_1:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket
+                BucketName: "{{ resource_prefix }}-s3-bucket"
             pravic_s3_bucket_2:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket-2
+                BucketName: "{{ resource_prefix }}-s3-bucket-2"
             pravic_s3_bucket_3:
               Type: AWS::S3::Bucket
               Properties:
-                BucketName: ansible-test-pravic-s3-bucket-3
+                BucketName: "{{ resource_prefix }}-s3-bucket-3"

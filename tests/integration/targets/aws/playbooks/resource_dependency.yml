@@ -1,7 +1,7 @@
 - hosts: localhost
   gather_facts: false
   collections:
-  - cloud.pravic
+  - pravic.pravic
   environment:
     AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
     AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
@@ -12,8 +12,8 @@
   - ansible.builtin.include_vars: ../files/resources.yml
 
   - block:
-    - cloud.pravic.resources:
+    - pravic.pravic.resources:
         state: "{{ state | default('present') }}"
     always:
-      - cloud.pravic.resources:
+      - pravic.pravic.resources:
           state: "{{ state | default('absent') }}"

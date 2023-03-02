@@ -2,34 +2,34 @@ resources:
   s3_bucket_1:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: ansible-test-pravic-s3-bucket-1
+      BucketName: "{{ resource_prefix }}-s3-bucket-1"
       Tags:
         - Key: bucket
           Value: resource:s3_bucket_2.Properties.Arn
-  
+
   s3_bucket_2:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: ansible-test-pravic-s3-bucket-2
+      BucketName: "{{ resource_prefix }}-s3-bucket-2"
       Tags:
         - Key: otherbucket
           Value: resource:s3_bucket_3.Properties.Arn
-  
+
   s3_bucket_3:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: ansible-test-pravic-s3-bucket-3
-  
+      BucketName: "{{ resource_prefix }}-s3-bucket-3"
+
   s3_access_point:
     Type: AWS::S3::AccessPoint
     Properties:
       Bucket: resource:s3_bucket_1.Properties.BucketName
       Name: pravic-s3-access-point-1
-  
+
   iam_role:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: ansible-test-pravic-iam-1
+      RoleName: "{{ resource_prefix }}-iam-1"
       Description: pravic iam role
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -40,11 +40,11 @@ resources:
             Principal:
               Service:
                   - lambda.amazonaws.com
-  
+
   lambda_function:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: ansible-test-pravic-lambda-1
+      FunctionName: "{{ resource_prefix }}-lambda-1"
       Runtime: nodejs16.x
       Handler: index.handler
       Description: Invoke a function during stack creation.
@@ -75,15 +75,15 @@ resources:
       Role: resource:iam_role.Properties.Arn
       TracingConfig:
         Mode: Active
-  
+
   s3_object_lambda_access_point:
     Type: AWS::S3ObjectLambda::AccessPoint
     Properties:
-      Name: ansible-test-pravic-lambda-ap-1
+      Name: "{{ resource_prefix }}-lambda-ap-1"
       ObjectLambdaConfiguration:
         SupportingAccessPoint: resource:s3_access_point.Properties.Arn
         TransformationConfigurations:
-          - Actions: 
+          - Actions:
               - "GetObject"
             ContentTransformation:
               AwsLambda:
