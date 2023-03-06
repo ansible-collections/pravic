@@ -1,6 +1,5 @@
 import json
 from typing import Any, Dict, Tuple
-import copy
 import uuid
 
 from ansible.module_utils.basic import to_native
@@ -21,21 +20,6 @@ except ImportError:
 from ansible.module_utils.common.dict_transformations import dict_merge
 from ansible_collections.pravic.pravic.plugins.module_utils.resource import CloudClient
 from ansible_collections.pravic.pravic.plugins.module_utils.exception import CloudException
-
-
-def dict_merge(a, b):
-    '''recursively merges dicts. not just simple a['key'] = b['key'], if
-    both a and b have a key whose value is a dict then dict_merge is called
-    on both values and the result stored in the returned dictionary.'''
-    if not isinstance(b, dict):
-        return b
-    result = copy.deepcopy(a)
-    for k, v in b.items():
-        if k in result and isinstance(result[k], dict):
-            result[k] = dict_merge(result[k], v)
-        else:
-            result[k] = copy.deepcopy(v)
-    return result
 
 
 class AzureRestClient(object):

@@ -1,5 +1,5 @@
 - name: Create resources
-  cloud.pravic.resources:
+  pravic.pravic.resources:
     client: "azure"
     resources: "{{ resources }}"
   register: _create
@@ -10,7 +10,7 @@
       - _create is changed
 
 - name: Create resources once again (idempontency)
-  cloud.pravic.resources:
+  pravic.pravic.resources:
     client: "azure"
     resources: "{{ resources }}"
   register: _idempotency
@@ -21,7 +21,7 @@
       - _idempotency is not changed
 
 - name: Delete resources
-  cloud.pravic.resources:
+  pravic.pravic.resources:
     client: "azure"
     state: absent
     resources: "{{ resources }}"
@@ -33,7 +33,7 @@
       - _delete is changed
 
 - name: Delete resources once again (idempontency)
-  cloud.pravic.resources:
+  pravic.pravic.resources:
     client: "azure"
     state: absent
     resources: "{{ resources }}"

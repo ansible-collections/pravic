@@ -96,26 +96,12 @@ class Discoverer:
         return ResourceType(json.loads(result["Schema"]))
 
 
-<<<<<<< HEAD
-class AwsBotocoreError(Exception):
-    def __init__(self, exc, msg):
-        self.exc = exc
-        self.msg = msg
-        super().__init__(self.msg)
-
-
-=======
->>>>>>> fdb2d5a (add integration tests)
 class AwsClient(CloudClient):
     def __init__(self, check_mode=False, **kwargs) -> None:
         if not HAS_BOTO3:
-<<<<<<< HEAD
-            raise AwsBotocoreError(msg=missing_required_lib("boto3 and botocore"), exc=BOTO3_IMP_ERR)
-=======
             raise CloudException(
                 missing_required_lib("boto3 and botocore")
             )
->>>>>>> fdb2d5a (add integration tests)
 
         self.check_mode = check_mode
         self.session = boto3.session.Session(**kwargs)
