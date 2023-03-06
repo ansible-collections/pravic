@@ -32,7 +32,7 @@ resources:
       RoleName: "{{ resource_prefix }}-iam-1"
       Description: pravic iam role
       AssumeRolePolicyDocument:
-        Version: 2012-10-17
+        Version: "2012-10-17"
         Statement:
           - Action:
               - sts:AssumeRole

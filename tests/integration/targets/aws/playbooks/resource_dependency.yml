@@ -8,12 +8,15 @@
     AWS_SESSION_TOKEN: "{{ security_token | default(omit) }}"
     AWS_DEFAULT_REGION: "{{ aws_region | default('us-east-1') }}"
 
-  tasks:
-  - ansible.builtin.include_vars: ../files/resources.yml
+  vars_files:
+  - ../files/resources.yml
 
+  tasks:
   - block:
     - pravic.pravic.resources:
         state: "{{ state | default('present') }}"
+        resources: "{{ resources }}"
     always:
       - pravic.pravic.resources:
           state: "{{ state | default('absent') }}"
+          resources: "{{ resources }}"
