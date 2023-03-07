@@ -8,7 +8,7 @@ from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils.six.moves import configparser
 import ansible.module_utils.six.moves.urllib.parse as urlparse
 
-from ansible_collections.cloud.pravic.plugins.module_utils.exception import CloudException
+from ansible_collections.pravic.pravic.plugins.module_utils.exception import CloudException
 
 
 AZURE_CREDENTIAL_ENV_MAPPING = dict(
