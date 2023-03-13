@@ -21,7 +21,6 @@ except ImportError:
 
 from ansible.module_utils.basic import missing_required_lib
 
-
 REREG = re.compile(r"resource:((\w+)\S+)")
 
 

@@ -38,6 +38,14 @@ options:
     description:
       - parameters used to create cloud client.
     type: dict
+  client:
+    description:
+      - cloud client.
+    choices:
+      - azure
+      - aws
+    type: str
+    required: true
 
 requirements:
   - "python >= 3.9"
@@ -86,7 +94,9 @@ resources:
 
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.pravic.pravic.plugins.module_utils.exception import CloudException, module_fail_from_exception
 from ansible_collections.pravic.pravic.plugins.module_utils.aws.client import AwsClient
+from ansible_collections.pravic.pravic.plugins.module_utils.azure.client import AzureClient
 
 
 ARG_SPEC = {
@@ -94,19 +104,29 @@ ARG_SPEC = {
     "state": {"type": "str", "choices": ["present", "absent"], "default": "present"},
     "current_state": {"type": "dict"},
     "connection": {"type": "dict"},
+    "client": {"type": "str", "choices": ["aws", "azure"], "required": True},
+}
+
+CLIENT_MAPPING = {
+    "aws": AwsClient,
+    "azure": AzureClient,
 }
 
 
 def main():
     module = AnsibleModule(argument_spec=ARG_SPEC, supports_check_mode=True)
-    client = AwsClient(check_mode=module.check_mode, **module.params.get("connection") or {})
-    result = client.run(
-        module.params.get("resources", []),
-        module.params.get("current_state", {}),
-        module.params["state"],
-        module.check_mode,
-    )
-    module.exit_json(changed=result["changed"], resources=result)
+    try:
+        client_obj = CLIENT_MAPPING.get(module.params.get("client"))
+        client = client_obj(check_mode=module.check_mode, **module.params.get("connection") or {})
+        result = client.run(
+            module.params.get("resources", []),
+            module.params.get("current_state", {}),
+            module.params["state"],
+            module.check_mode,
+        )
+        module.exit_json(changed=result["changed"], resources=result)
+    except CloudException as e:
+        module_fail_from_exception(module, e)
 
 
 if __name__ == "__main__":
