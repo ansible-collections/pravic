@@ -16,7 +16,9 @@
     - pravic.pravic.resources:
         state: "{{ state | default('present') }}"
         resources: "{{ resources }}"
+        client: "aws"
     always:
       - pravic.pravic.resources:
           state: "{{ state | default('absent') }}"
           resources: "{{ resources }}"
+          client: "aws"
