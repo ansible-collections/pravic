@@ -23,6 +23,9 @@ A number of existing Ansible modules support purge_* parameters for different co
 * [purge_policies](https://github.com/ansible-collections/amazon.aws/blob/main/plugins/modules/iam_user.py)
 * …
 
+## Preliminary solutions and possible consequencies
+
+### Solution #1: Define a generic purge parameter
 For example, we have the following S3 bucket with some tags:
 
 ```json
@@ -54,32 +57,33 @@ Suppose we want to update the S3 bucket, retaining the tags already assigned:
             BucketName: pravic-s3-bucket-1
             Tags:
                 - Key: tag_3
-                Value: Tag_3
+                  Value: Tag_3
 ```
 
-Without `purge_tags` option, we would need to perform three tasks:
-* Gather information about the existing S3 bucket and find out its actual tags;
-* Remove the existing tags of the S3 bucket;
-* Re-tag the S3 bucket with the new and old tags;
-
-`purge_tags` option will allow you to set that configuration within only one task by setting `purge_tags=false`.
-
-## Decision and possible consequencies
+With the defined state approach that pravic uses, there is no way for the user to add tags to an existing resource, all they can do is define what the final list of tags should be. They would have to know what tags are currently on a resource, and then make sure that those are added to their resource definition. Adding a `purge_tags` option provides the ability to modify the existing set of tags while still using a defined state.
 
 With the new resource modules and implementing only `state=present` will result quite difficult to implement a `purge_*` parameter for each possible property of each resource module. At the same time, the choice not to implement `purge_*` parameters seems to be a missing feature from the user's point of view, who will not have the ability to easily and immediately change the state of resources as desired in a single task.
 
-One possible approach would be to support a generic purge parameter. In addition, a `state: updated` could be added, allowing the user to explicitly confirm their intention to change the state of the resource.
-
 Another pretty big consequence of this decision is that in the current proposal the new states would be applied across all properties of all resources. Given that the general idea behind pravic is to define a bunch of resources and then have those created at once, this does not leave the user with much control over things.
 
-However, let's take a look at the network resource modules that support different states ([see](https://docs.ansible.com/ansible/latest/network/user_guide/network_resource_modules.html)).
+Hence, one possible approach would be to support a generic purge parameter. In addition, a `state: updated` could be added, allowing the user to explicitly confirm their intention to change the state of the resource.
+
+### Solution #2: Comply to network resource modules
+
+Let's take a look at the network resource modules that support different states ([see](https://docs.ansible.com/ansible/latest/network/user_guide/network_resource_modules.html)).
 
 Relating to the previous example, `state=merged` will allow us to accomplish that in one single task. Conversely, if we want to reinitialize resource tags completely, `state=deleted` allows us to do so. `state=replaced`, on the other hand, allows us to replace a resource's existing information with new one.
 
 In addition, `state=gathered`, will allow us to get information on a specific resource.
 
-One proposal is to comply with network resource modules states and implement those for project pravic when it comes to resource update.
+One proposal is to comply with network resource modules states and implement those for project pravic when it comes to resource update. However, one disadvantage of this approach is that the state strategy (e.g., replaced, merged, absent) alters all the options that are changed in the desired compared to the resource state.
 
+To summarize:
+- `state=present` does resource provisioning, while `state=absent` does only resource deprovisioning.
+- When `state=present` and desired state differs from the resource state, no change is applied to the resource. The already existing resource will only be altered when state is `replaced` or `merged`. The resource is provisioned only when `state=present`. `state=merged` or `state=replaced` won't have any impact on a non existing resource.
+- We could use `state=replaced` with an empty list or None value, like we do with the current collections rather than `state=deleted` to reinitialize resource properties.
+
+### Solution #3: Resource-level update stategy
 One other alternative is moving this functionality to the resource declaration. We could add another optional field to the resource definition to allow for finer grained control. Something like:
 
 ```yaml
@@ -88,7 +92,7 @@ One other alternative is moving this functionality to the resource declaration. 
         Resources:
         bucket_01:
             Options:
-            Tags: merged
+                Tags: merged
             Type: AWS::S3::Bucket
             Properties:
             ...
@@ -96,4 +100,5 @@ One other alternative is moving this functionality to the resource declaration. 
 
 The disadvantages of this approach are that it diverges from the network resource modules and it could end up being really tedious having to add this to every resource if you wanted to always use something like `state=merged`.
 
-However, `state=present` will do resource provisioning, while `state=absent` will do resource deprovisioning. Also, we could also use `state=replaced` with an empty list or None value, like we do with the current collections rather than `state=deleted`.
+## Decision
+We propose to adopt Solution #2 to handle resource update. The solution partially complies with the behaviour of the network resource modules. Consequently, we propose that the state parameter accept the following values: `present`, `absent`, `replaced` and `merged`.
