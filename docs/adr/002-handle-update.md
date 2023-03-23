@@ -79,7 +79,7 @@ In addition, `state=gathered`, will allow us to get information on a specific re
 One proposal is to comply with network resource modules states and implement those for project pravic when it comes to resource update. However, one disadvantage of this approach is that the state strategy (e.g., replaced, merged, absent) alters all the options that are changed in the desired compared to the resource state.
 
 To summarize:
-- If `state=merged` or `state=replaced` is used and the resource is not already existing a new one is created. If the resource already exists, the options are altered according to the specified state strategy.
+- If `state=merged` or `state=replaced` is used and the resource does not already exist a new one is created. If the resource already exists, the options are altered according to the specified state strategy.
 We could use `state=replaced` with an empty list or None value to reinitialize resource properties.
 - If `state=deleted`, the resource is deleted.
 
