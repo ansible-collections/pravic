@@ -189,6 +189,6 @@ class AwsClient(CloudClient):
             RequestToken=token,
             WaiterConfig={
                 "Delay": 10,
-                "MaxAttempts": 60,
+                "MaxAttempts": 30,
             },
         )
