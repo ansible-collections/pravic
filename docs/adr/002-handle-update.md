@@ -79,9 +79,9 @@ In addition, `state=gathered`, will allow us to get information on a specific re
 One proposal is to comply with network resource modules states and implement those for project pravic when it comes to resource update. However, one disadvantage of this approach is that the state strategy (e.g., replaced, merged, absent) alters all the options that are changed in the desired compared to the resource state.
 
 To summarize:
-- `state=present` does resource provisioning, while `state=absent` does only resource deprovisioning.
-- When `state=present` and desired state differs from the resource state, no change is applied to the resource. The already existing resource will only be altered when state is `replaced` or `merged`. The resource is provisioned only when `state=present`. `state=merged` or `state=replaced` won't have any impact on a non existing resource.
-- We could use `state=replaced` with an empty list or None value, like we do with the current collections rather than `state=deleted` to reinitialize resource properties.
+- If `state=merged` or `state=replaced` is used and the resource is not already existing a new one is created. If the resource already exists, the options are altered according to the specified state strategy.
+We could use `state=replaced` with an empty list or None value to reinitialize resource properties.
+- If `state=deleted`, the resource is deleted.
 
 ### Solution #3: Resource-level update stategy
 One other alternative is moving this functionality to the resource declaration. We could add another optional field to the resource definition to allow for finer grained control. Something like:
@@ -101,4 +101,4 @@ One other alternative is moving this functionality to the resource declaration. 
 The disadvantages of this approach are that it diverges from the network resource modules and it could end up being really tedious having to add this to every resource if you wanted to always use something like `state=merged`.
 
 ## Decision
-We propose to adopt Solution #2 to handle resource update. The solution partially complies with the behaviour of the network resource modules. Consequently, we propose that the state parameter accept the following values: `present`, `absent`, `replaced` and `merged`.
+We propose to adopt Solution #2 to handle resource update. The solution partially complies with the behaviour of the network resource modules. Consequently, we propose that the state parameter accept the following values: `deleted`, `replaced` and `merged`.
