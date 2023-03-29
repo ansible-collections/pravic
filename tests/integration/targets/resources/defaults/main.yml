@@ -1,0 +1,9 @@
+---
+resources:
+  resources_s3_bucket_1:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: resources-test-s3-bucket
+      Tags:
+        - Key: module
+          Value: resources

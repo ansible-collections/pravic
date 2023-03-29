@@ -70,6 +70,7 @@ EXAMPLES = r"""
               Effect: Allow
               Principal:
               Service: s3.amazonaws.com
+
 # Delete Amazon EC2 key pair
 - name: Delete Amazon EC2 key pair
   pravic.pravic.resources:
@@ -78,7 +79,7 @@ EXAMPLES = r"""
       key_1:
         Type: AWS::EC2::KeyPair
         Properties:
-          KeyName: aubin-pravic
+          KeyName: test-pravic
           KeyType: rsa
 
 """
