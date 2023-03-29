@@ -1,0 +1,15 @@
+---
+- block:
+    - name: trying to create simple object without 'resources' parameters
+      pravic.pravic.resources:
+        state: present
+        client: aws
+      ignore_errors: true
+      register: _resource_failure
+
+    - name: Assert that module failed with proper message
+      assert:
+        that:
+          - _resource_failure is failed
+          - _resource_failure.msg == "missing required arguments: resources"
+  when: resources is defined
