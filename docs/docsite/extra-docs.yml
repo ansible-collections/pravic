@@ -3,3 +3,6 @@ sections:
   - title: Specification format for storing resource state
     toctree:
       - stored_state_schema
+  - title: Specification for defining desired resource state
+    toctree:
+      - desired_state_schema
