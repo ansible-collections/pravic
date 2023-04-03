@@ -24,7 +24,7 @@ resources:
     Type: AWS::S3::AccessPoint
     Properties:
       Bucket: resource:s3_bucket_1.Properties.BucketName
-      Name: "{{ resource_prefix }}-s3-access-point-1"
+      Name: "{{ resource_prefix }}-s3-ap-1"
 
   iam_role:
     Type: AWS::IAM::Role
