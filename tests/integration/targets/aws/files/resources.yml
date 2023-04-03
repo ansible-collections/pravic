@@ -2,7 +2,7 @@ resources:
   s3_bucket_1:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: "{{ resource_prefix }}-s3-bucket-1"
+      BucketName: "{{ tiny_prefix }}-s3-bucket-1"
       Tags:
         - Key: bucket
           Value: resource:s3_bucket_2.Properties.Arn
@@ -10,7 +10,7 @@ resources:
   s3_bucket_2:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: "{{ resource_prefix }}-s3-bucket-2"
+      BucketName: "{{ tiny_prefix }}-s3-bucket-2"
       Tags:
         - Key: otherbucket
           Value: resource:s3_bucket_3.Properties.Arn
@@ -18,18 +18,18 @@ resources:
   s3_bucket_3:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: "{{ resource_prefix }}-s3-bucket-3"
+      BucketName: "{{ tiny_prefix }}-s3-bucket-3"
 
   s3_access_point:
     Type: AWS::S3::AccessPoint
     Properties:
       Bucket: resource:s3_bucket_1.Properties.BucketName
-      Name: "{{ resource_prefix }}-s3-ap-1"
+      Name: "{{ tiny_prefix }}-s3-ap-1"
 
   iam_role:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: "{{ resource_prefix }}-iam-1"
+      RoleName: "ansible-test-{{ tiny_prefix }}"
       Description: pravic iam role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -44,7 +44,7 @@ resources:
   lambda_function:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: "{{ resource_prefix }}-lambda-1"
+      FunctionName: "{{ tiny_prefix }}-lambda-1"
       Runtime: nodejs16.x
       Handler: index.handler
       Description: Invoke a function during stack creation.
@@ -79,7 +79,7 @@ resources:
   s3_object_lambda_access_point:
     Type: AWS::S3ObjectLambda::AccessPoint
     Properties:
-      Name: "{{ resource_prefix }}-lambda-ap-1"
+      Name: "{{ tiny_prefix }}-lambda-ap-1"
       ObjectLambdaConfiguration:
         SupportingAccessPoint: resource:s3_access_point.Properties.Arn
         TransformationConfigurations:
