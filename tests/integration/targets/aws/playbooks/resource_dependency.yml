@@ -1,0 +1,24 @@
+- hosts: localhost
+  gather_facts: false
+  collections:
+  - pravic.pravic
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+    AWS_SESSION_TOKEN: "{{ security_token | default(omit) }}"
+    AWS_DEFAULT_REGION: "{{ aws_region | default('us-east-1') }}"
+
+  vars_files:
+  - ../files/resources.yml
+
+  tasks:
+  - block:
+    - pravic.pravic.resources:
+        state: "{{ state | default('present') }}"
+        resources: "{{ resources }}"
+        client: "aws"
+    always:
+      - pravic.pravic.resources:
+          state: "{{ state | default('absent') }}"
+          resources: "{{ resources }}"
+          client: "aws"
