@@ -59,7 +59,7 @@ Every voice is important. If you have something on your mind, create an issue or
 
 ## Using this collection
 
-The `pravic.pravic` collection enables use of ansible-playbook to manage a set of resources which have been declared in a `resources.yml` file.  
+The `pravic.pravic` collection enables use of ansible-playbook to manage a set of resources which have been declared in a playbook or in a YAML file.
 
 Given a `playbook.yml` file of:
 
@@ -72,22 +72,16 @@ Given a `playbook.yml` file of:
   tasks:
     - name: cloud_1
       pravic.pravic.resources:
+        client: "aws"
         state: "{{ state | default('present') }}"
-        connection:
-          profile_name: content
-
-    - name: cloud_2
-      pravic.pravic.resources:
-        state: "{{ state | default('present') }}"
-        connection:
-          profile_name: content
+        resources: "{{ resources }}"
 ```
 
 And a `resources.yaml` file:
 
 ```yaml
-pravic.pravic.resources/cloud_1:
-  - name: bucket_01
+resources:
+  bucket_01:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: ansible-declared-state-01
@@ -95,24 +89,47 @@ pravic.pravic.resources/cloud_1:
         - Key: otherbucket
           Value: resource:bucket_02.Properties.Arn
 
-  - name: bucket_02
+  bucket_02:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: ansible-declared-state-02
 
-  - name: bucket_03
+  bucket_03:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: ansible-declared-state-03
-
-pravic.pravic.resources/cloud_2:
-  - name: bucket_01
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: ansible-declared-state-04
 ```
 
 Executing `ansible-playbook playbook.yml` with a set of valid AWS credentials would create the specified S3 buckets.  Notably, the resource named `bucket_01` depends on the ARN of `bucket_02`.  The pravic collection will [resolve references](https://github.com/ansible-collections/pravic/blob/main/plugins/module_utils/resource.py) between resources and determine the correct order to execute API calls to create resources in as well as automatically supplying the value without the playbook author needing to include a task to query the S3 API for the bucket info and register the ARN as an Ansible variable.
+
+If you do not want to define the resources in a separate YAML file, you can also define them directly in the `playbook.yml` file like this:
+
+```yaml
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: cloud_1
+      pravic.pravic.resources:
+        client: "aws"
+        state: "{{ state | default('present') }}"
+        resources:
+          bucket_01:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: ansible-declared-state-01
+              Tags:
+                - Key: otherbucket
+                  Value: resource:bucket_02.Properties.Arn
+          bucket_02:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: ansible-declared-state-02
+          bucket_03:
+            Type: AWS::S3::Bucket
+            Properties:
+              BucketName: ansible-declared-state-03
+```
 
 ## Release notes
 
