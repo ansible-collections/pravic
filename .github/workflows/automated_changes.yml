@@ -1,0 +1,16 @@
+---
+name: automated changes
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.sha }}'
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types:
+      - labeled
+
+jobs:
+  code_formatting:
+    uses: abikouo/gha_testing/.github/workflows/black.yml@main
+  changelog:
+    uses: abikouo/gha_testing/.github/workflows/changelog.yml@main
