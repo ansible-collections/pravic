@@ -1,0 +1,61 @@
+name: CI
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - labeled
+      - unlabeled
+      - synchronize
+    branches:
+      - main
+      - stable-*
+    tags:
+      - '*'
+
+jobs:
+  changelog:
+    uses: ansible-network/github_actions/.github/workflows/changelog.yml@main
+  integration:
+    env:
+      source: "./source"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible-version:
+          - milestone
+          - devel
+        python-version:
+          - "3.9"
+    name: "ansible-test-integration-py${{ matrix.python-version }}-${{ matrix.ansible-version }}"
+    steps:
+      - name: Checkout collection
+        uses: actions/checkout@v3
+        with:
+          path: ${{ env.source }}
+          fetch-depth: "0"
+
+      - name: Build and install collection
+        id: install-collection
+        uses: abikouo/github_actions/.github/actions/build_install_collection@build_install_collection
+        with:
+          install_python_dependencies: true
+          source_path: ${{ env.source }}
+
+      - name: Create AWS/sts session credentials
+        uses: abikouo/github_actions/.github/actions/ansible_aws_test_provider@ansible_test_integration_a
+        with:
+          collection_path: ${{ steps.install-collection.outputs.collection_path }}
+          ansible_core_ci_key: ${{ secrets.ANSIBLE_CORE_CI_KEY }}
+
+      - name: Run integration tests
+        uses: abikouo/github_actions/.github/actions/ansible_test_integration@ansible_test_integration_a
+        with:
+          collection_path: ${{ steps.install-collection.outputs.collection_path }}
+          python_version: ${{ matrix.python-version }}
+          ansible_version: ${{ matrix.ansible-version }}
