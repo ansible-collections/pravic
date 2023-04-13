@@ -20,6 +20,7 @@ on:
 
 jobs:
   safe-to-test:
+    if: github.event.label.name == 'safe to test' || github.event.action != 'labeled'
     permissions:
       pull-requests: write
       contents: write
