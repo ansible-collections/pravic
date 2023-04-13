@@ -20,6 +20,12 @@ on:
 jobs:
   changelog:
     uses: ansible-network/github_actions/.github/workflows/changelog.yml@main
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Dump context
+        uses: crazy-max/ghaction-dump-context@v2
   integration:
     env:
       source: "./source"
