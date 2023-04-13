@@ -20,17 +20,14 @@ on:
 
 jobs:
   safe-to-test:
-    if: >-
-      github.event.label.name == 'safe to test' ||
-      github.event.action != 'labeled'
-    uses: ansible-network/github_actions/.github/workflows/safe-to-test.yml@main
+    permissions:
+      pull-requests: write
+      contents: write
+    uses: abikouo/gha_testing/.github/workflows/safe-to-test.yml@main
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   integration:
-    if: >-
-      github.event.label.name == 'safe to test' ||
-      github.event.action != 'labeled'
     needs:
       - safe-to-test
     env:
@@ -72,9 +69,6 @@ jobs:
           ansible_version: ${{ matrix.ansible-version }}
 
   integration_passed:
-    if: >-
-      github.event.label.name == 'safe to test' ||
-      github.event.action != 'labeled'
     needs:
       - integration
     runs-on: ubuntu-latest
