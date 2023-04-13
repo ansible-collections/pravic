@@ -1,26 +1,38 @@
-name: CI
+# Some tests require secrets from the repo
+# and therefore require an approval/label to run
+name: integration
+
 concurrency:
-  group: ${{ github.head_ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 on:
   pull_request_target:
-    types:
-      - opened
-      - reopened
-      - labeled
-      - unlabeled
-      - synchronize
     branches:
       - main
       - stable-*
-    tags:
-      - '*'
+    types:
+      - labeled
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
 
 jobs:
-  changelog:
-    uses: ansible-network/github_actions/.github/workflows/changelog.yml@main
+  safe-to-test:
+    if: >-
+      github.event.label.name == 'safe to test' ||
+      github.event.action != 'labeled'
+    uses: ansible-network/github_actions/.github/workflows/safe-to-test.yml@main
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   integration:
+    if: >-
+      github.event.label.name == 'safe to test' ||
+      github.event.action != 'labeled'
+    needs:
+      - safe-to-test
     env:
       source: "./source"
     runs-on: ubuntu-latest
@@ -28,7 +40,6 @@ jobs:
       fail-fast: false
       matrix:
         ansible-version:
-          - milestone
           - devel
         python-version:
           - "3.9"
@@ -59,3 +70,16 @@ jobs:
           collection_path: ${{ steps.install-collection.outputs.collection_path }}
           python_version: ${{ matrix.python-version }}
           ansible_version: ${{ matrix.ansible-version }}
+
+  integration_passed:
+    if: >-
+      github.event.label.name == 'safe to test' ||
+      github.event.action != 'labeled'
+    needs:
+      - integration
+    runs-on: ubuntu-latest
+    steps:
+      - run: >-
+          python -c "assert set([
+          '${{ needs.integration.result }}',
+          ]) == {'success'}"
