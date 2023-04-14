@@ -32,9 +32,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
   safe-to-test:
-    if: github.event.label.name == 'safe to test' || github.event.action != 'labeled'
-    permissions: write-all
-    uses: abikouo/gha_testing/.github/workflows/safe-to-test.yml@main
+    if: >-
+      github.event.label.name == 'safe to test' ||
+      github.event.action != 'labeled'
+    uses: ansible-network/github_actions/.github/workflows/safe-to-test.yml@main
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
