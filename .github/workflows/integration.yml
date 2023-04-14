@@ -19,6 +19,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  collaborators:
+    permissions: read-all
+    runs-on: ubuntu-latest
+    name: list repository collaborators
+    steps:
+      - name: List collaborators using REST API
+        run: >-
+          curl -X GET -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/repos/ansible-collections/pravic/collaborators
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
   safe-to-test:
     if: github.event.label.name == 'safe to test' || github.event.action != 'labeled'
     permissions: write-all
