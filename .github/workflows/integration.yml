@@ -18,7 +18,15 @@ on:
       - synchronize
   workflow_dispatch:
 
-jobs: 
+jobs:
+  safe-to-test-network:
+    if: >-
+      github.event.label.name == 'safe to test' ||
+      github.event.action != 'labeled'
+    uses: ansible-network/github_actions/.github/workflows/safe-to-test.yml@main
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   safe-to-test:
     if: github.event.label.name == 'safe to test' || github.event.action != 'labeled'
     permissions:
