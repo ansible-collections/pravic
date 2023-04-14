@@ -21,7 +21,9 @@ on:
 jobs: 
   safe-to-test:
     if: github.event.label.name == 'safe to test' || github.event.action != 'labeled'
-    permissions: read-all
+    permissions:
+      pull-requests: write
+      contents: write
     uses: abikouo/gha_testing/.github/workflows/safe-to-test.yml@main
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
