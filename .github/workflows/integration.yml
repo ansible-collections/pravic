@@ -20,13 +20,11 @@ on:
 
 jobs: 
   safe-to-test:
-    if: >-
-      github.event.label.name == 'safe to test' ||
-      github.event.action != 'labeled'
+    if: github.event.label.name == 'safe to test' || github.event.action != 'labeled'
     permissions:
       pull-requests: write
       contents: write
-    uses: ansible-network/github_actions/.github/workflows/safe-to-test.yml@main
+    uses: abikouo/gha_testing/.github/workflows/safe-to-test.yml@main
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
