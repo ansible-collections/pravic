@@ -1,0 +1,3 @@
+---
+trivial:
+  - Executed black formatting command to format the files under plugins/ and tests/ (https://github.com/ansible-collections/pravic/pull/38).
