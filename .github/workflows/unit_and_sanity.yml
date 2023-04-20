@@ -30,20 +30,10 @@ jobs:
               "ansible-version": "stable-2.9"
             },
             {
-              "ansible-version": "stable-2.12",
-              "python-version": "3.7"
+              "ansible-version": "stable-2.12"
             },
             {
-              "ansible-version": "stable-2.12",
-              "python-version": "3.11"
-            },
-            {
-              "ansible-version": "stable-2.13",
-              "python-version": "3.7"
-            },
-            {
-              "ansible-version": "stable-2.13",
-              "python-version": "3.11"
+              "ansible-version": "stable-2.13"
             },
             {
               "ansible-version": "stable-2.14",
@@ -95,20 +85,10 @@ jobs:
               "python-version": "3.11"
             },
             {
-              "ansible-version": "stable-2.12",
-              "python-version": "3.7"
+              "ansible-version": "stable-2.12"
             },
             {
-              "ansible-version": "stable-2.13",
-              "python-version": "3.7"
-            },
-            {
-              "ansible-version": "stable-2.12",
-              "python-version": "3.8"
-            },
-            {
-              "ansible-version": "stable-2.13",
-              "python-version": "3.8"
+              "ansible-version": "stable-2.13"
             },
             {
               "ansible-version": "stable-2.14",

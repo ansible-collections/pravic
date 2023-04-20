@@ -3,7 +3,7 @@
 
 from unittest.mock import MagicMock, patch, call
 import pytest
-from typing import Dict, List
+from typing import Dict
 
 from ansible_collections.pravic.pravic.plugins.module_utils.resource import (
     get_value,
