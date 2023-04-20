@@ -99,9 +99,7 @@ class Discoverer:
 class AwsClient(CloudClient):
     def __init__(self, check_mode=False, **kwargs) -> None:
         if not HAS_BOTO3:
-            raise CloudException(
-                missing_required_lib("boto3 and botocore")
-            )
+            raise CloudException(missing_required_lib("boto3 and botocore"))
 
         self.check_mode = check_mode
         self.session = boto3.session.Session(**kwargs)

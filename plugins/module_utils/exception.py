@@ -7,9 +7,7 @@ from ansible.module_utils.common.text.converters import to_text
 
 def module_fail_from_exception(module, exception):
     msg = to_text(exception)
-    tb = "".join(
-        traceback.format_exception(None, exception, exception.__traceback__)
-    )
+    tb = "".join(traceback.format_exception(None, exception, exception.__traceback__))
     return module.fail_json(msg=msg, exception=tb)
 
 

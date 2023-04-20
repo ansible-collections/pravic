@@ -12,18 +12,18 @@ from ansible_collections.pravic.pravic.plugins.module_utils.exception import Clo
 
 
 AZURE_CREDENTIAL_ENV_MAPPING = dict(
-    profile='AZURE_PROFILE',
-    subscription_id='AZURE_SUBSCRIPTION_ID',
-    client_id='AZURE_CLIENT_ID',
-    secret='AZURE_SECRET',
-    tenant='AZURE_TENANT',
-    ad_user='AZURE_AD_USER',
-    password='AZURE_PASSWORD',
-    cloud_environment='AZURE_CLOUD_ENVIRONMENT',
-    cert_validation_mode='AZURE_CERT_VALIDATION_MODE',
-    adfs_authority_url='AZURE_ADFS_AUTHORITY_URL',
-    x509_certificate_path='AZURE_X509_CERTIFICATE_PATH',
-    thumbprint='AZURE_THUMBPRINT'
+    profile="AZURE_PROFILE",
+    subscription_id="AZURE_SUBSCRIPTION_ID",
+    client_id="AZURE_CLIENT_ID",
+    secret="AZURE_SECRET",
+    tenant="AZURE_TENANT",
+    ad_user="AZURE_AD_USER",
+    password="AZURE_PASSWORD",
+    cloud_environment="AZURE_CLOUD_ENVIRONMENT",
+    cert_validation_mode="AZURE_CERT_VALIDATION_MODE",
+    adfs_authority_url="AZURE_ADFS_AUTHORITY_URL",
+    x509_certificate_path="AZURE_X509_CERTIFICATE_PATH",
+    thumbprint="AZURE_THUMBPRINT",
 )
 
 HAS_AZURE = True
@@ -61,11 +61,24 @@ class AzureCredentials(object):
     _cloud_environment = None
     _adfs_authority_url = None
 
-    def __init__(self, auth_source=None, profile=None, subscription_id=None, client_id=None, secret=None,
-                 tenant=None, ad_user=None, password=None, cloud_environment='AzureCloud', cert_validation_mode='validate',
-                 api_profile='latest', adfs_authority_url=None, is_ad_resource=False,
-                 x509_certificate_path=None, thumbprint=None):
-
+    def __init__(
+        self,
+        auth_source=None,
+        profile=None,
+        subscription_id=None,
+        client_id=None,
+        secret=None,
+        tenant=None,
+        ad_user=None,
+        password=None,
+        cloud_environment="AzureCloud",
+        cert_validation_mode="validate",
+        api_profile="latest",
+        adfs_authority_url=None,
+        is_ad_resource=False,
+        x509_certificate_path=None,
+        thumbprint=None,
+    ):
         self.is_ad_resource = is_ad_resource
 
         # authenticate
@@ -83,28 +96,30 @@ class AzureCredentials(object):
             api_profile=api_profile,
             adfs_authority_url=adfs_authority_url,
             x509_certificate_path=x509_certificate_path,
-            thumbprint=thumbprint)
+            thumbprint=thumbprint,
+        )
 
         if not self.credentials:
             if HAS_AZURE_CLI_CORE:
-                self.fail("Failed to get credentials. Either pass as parameters, set environment variables, "
-                          "define a profile in ~/.azure/credentials, or log in with Azure CLI (`az login`).")
+                self.fail(
+                    "Failed to get credentials. Either pass as parameters, set environment variables, "
+                    "define a profile in ~/.azure/credentials, or log in with Azure CLI (`az login`)."
+                )
             else:
-                self.fail("Failed to get credentials. Either pass as parameters, set environment variables, "
-                          "define a profile in ~/.azure/credentials, or install Azure CLI and log in (`az login`).")
+                self.fail(
+                    "Failed to get credentials. Either pass as parameters, set environment variables, "
+                    "define a profile in ~/.azure/credentials, or install Azure CLI and log in (`az login`)."
+                )
 
         # cert validation mode precedence: module-arg, credential profile, env, "validate"
-        self._cert_validation_mode = cert_validation_mode or \
-            self.credentials.get('cert_validation_mode') or \
-            self._get_env('cert_validation_mode') or \
-            'validate'
+        self._cert_validation_mode = cert_validation_mode or self.credentials.get("cert_validation_mode") or self._get_env("cert_validation_mode") or "validate"
 
-        if self._cert_validation_mode not in ['validate', 'ignore']:
-            self.fail('invalid cert_validation_mode: {0}'.format(self._cert_validation_mode))
+        if self._cert_validation_mode not in ["validate", "ignore"]:
+            self.fail("invalid cert_validation_mode: {0}".format(self._cert_validation_mode))
 
         # if cloud_environment specified, look up/build Cloud object
-        raw_cloud_env = self.credentials.get('cloud_environment')
-        if self.credentials.get('credentials') is not None and raw_cloud_env is not None:
+        raw_cloud_env = self.credentials.get("cloud_environment")
+        if self.credentials.get("credentials") is not None and raw_cloud_env is not None:
             self._cloud_environment = raw_cloud_env
         elif not raw_cloud_env:
             self._cloud_environment = azure_cloud.AZURE_PUBLIC_CLOUD  # SDK default
@@ -124,95 +139,104 @@ class AzureCredentials(object):
                 except Exception as e:
                     self.fail("cloud_environment {0} could not be resolved: {1}".format(raw_cloud_env, e.message), exception=traceback.format_exc())
 
-        if self.credentials.get('subscription_id', None) is None and self.credentials.get('credentials') is None:
+        if self.credentials.get("subscription_id", None) is None and self.credentials.get("credentials") is None:
             self.fail("Credentials did not include a subscription_id value.")
-        self.subscription_id = self.credentials['subscription_id']
+        self.subscription_id = self.credentials["subscription_id"]
 
         # get authentication authority
         # for adfs, user could pass in authority or not.
         # for others, use default authority from cloud environment
-        if self.credentials.get('adfs_authority_url') is None:
+        if self.credentials.get("adfs_authority_url") is None:
             self._adfs_authority_url = self._cloud_environment.endpoints.active_directory
         else:
-            self._adfs_authority_url = self.credentials.get('adfs_authority_url')
+            self._adfs_authority_url = self.credentials.get("adfs_authority_url")
 
-        if self.credentials.get('auth_source') == 'msi':
+        if self.credentials.get("auth_source") == "msi":
             # MSI Credentials
-            self.azure_credentials = self.credentials['credentials']
-            self.azure_credential_track2 = self.credentials['credential']
-        elif self.credentials.get('credentials') is not None:
+            self.azure_credentials = self.credentials["credentials"]
+            self.azure_credential_track2 = self.credentials["credential"]
+        elif self.credentials.get("credentials") is not None:
             # AzureCLI credentials
-            self.azure_credentials = self.credentials['credentials']
-            self.azure_credential_track2 = self.credentials['credentials']
-        elif self.credentials.get('client_id') is not None and \
-                self.credentials.get('secret') is not None and \
-                self.credentials.get('tenant') is not None:
-
+            self.azure_credentials = self.credentials["credentials"]
+            self.azure_credential_track2 = self.credentials["credentials"]
+        elif self.credentials.get("client_id") is not None and self.credentials.get("secret") is not None and self.credentials.get("tenant") is not None:
             graph_resource = self._cloud_environment.endpoints.active_directory_graph_resource_id
             rm_resource = self._cloud_environment.endpoints.resource_manager
-            self.azure_credentials = ServicePrincipalCredentials(client_id=self.credentials['client_id'],
-                                                                 secret=self.credentials['secret'],
-                                                                 tenant=self.credentials['tenant'],
-                                                                 cloud_environment=self._cloud_environment,
-                                                                 resource=graph_resource if self.is_ad_resource else rm_resource,
-                                                                 verify=self._cert_validation_mode == 'validate')
-            self.azure_credential_track2 = client_secret.ClientSecretCredential(client_id=self.credentials['client_id'],
-                                                                                client_secret=self.credentials['secret'],
-                                                                                tenant_id=self.credentials['tenant'])
+            self.azure_credentials = ServicePrincipalCredentials(
+                client_id=self.credentials["client_id"],
+                secret=self.credentials["secret"],
+                tenant=self.credentials["tenant"],
+                cloud_environment=self._cloud_environment,
+                resource=graph_resource if self.is_ad_resource else rm_resource,
+                verify=self._cert_validation_mode == "validate",
+            )
+            self.azure_credential_track2 = client_secret.ClientSecretCredential(
+                client_id=self.credentials["client_id"], client_secret=self.credentials["secret"], tenant_id=self.credentials["tenant"]
+            )
 
-        elif self.credentials.get('client_id') is not None and \
-                self.credentials.get('tenant') is not None and \
-                self.credentials.get('thumbprint') is not None and \
-                self.credentials.get('x509_certificate_path') is not None:
-
+        elif (
+            self.credentials.get("client_id") is not None
+            and self.credentials.get("tenant") is not None
+            and self.credentials.get("thumbprint") is not None
+            and self.credentials.get("x509_certificate_path") is not None
+        ):
             self.azure_credentials = self.acquire_token_with_client_certificate(
                 self._adfs_authority_url,
                 self._cloud_environment.endpoints.active_directory_resource_id,
-                self.credentials['x509_certificate_path'],
-                self.credentials['thumbprint'],
-                self.credentials['client_id'],
-                self.credentials['tenant'])
+                self.credentials["x509_certificate_path"],
+                self.credentials["thumbprint"],
+                self.credentials["client_id"],
+                self.credentials["tenant"],
+            )
 
-            self.azure_credential_track2 = certificate.CertificateCredential(tenant_id=self.credentials['tenant'],
-                                                                             client_id=self.credentials['client_id'],
-                                                                             certificate_path=self.credentials['x509_certificate_path'])
+            self.azure_credential_track2 = certificate.CertificateCredential(
+                tenant_id=self.credentials["tenant"], client_id=self.credentials["client_id"], certificate_path=self.credentials["x509_certificate_path"]
+            )
 
-        elif self.credentials.get('ad_user') is not None and self.credentials.get('password') is not None:
-            tenant = self.credentials.get('tenant')
+        elif self.credentials.get("ad_user") is not None and self.credentials.get("password") is not None:
+            tenant = self.credentials.get("tenant")
             if not tenant:
-                tenant = 'common'  # SDK default
+                tenant = "common"  # SDK default
 
-            self.azure_credentials = UserPassCredentials(self.credentials['ad_user'],
-                                                         self.credentials['password'],
-                                                         tenant=tenant,
-                                                         cloud_environment=self._cloud_environment,
-                                                         verify=self._cert_validation_mode == 'validate')
+            self.azure_credentials = UserPassCredentials(
+                self.credentials["ad_user"],
+                self.credentials["password"],
+                tenant=tenant,
+                cloud_environment=self._cloud_environment,
+                verify=self._cert_validation_mode == "validate",
+            )
 
-            client_id = self.credentials.get('client_id', '04b07795-8ddb-461a-bbee-02f9e1bf7b46')
+            client_id = self.credentials.get("client_id", "04b07795-8ddb-461a-bbee-02f9e1bf7b46")
 
-            self.azure_credential_track2 = user_password.UsernamePasswordCredential(username=self.credentials['ad_user'],
-                                                                                    password=self.credentials['password'],
-                                                                                    tenant_id=self.credentials.get('tenant', 'organizations'),
-                                                                                    client_id=client_id)
+            self.azure_credential_track2 = user_password.UsernamePasswordCredential(
+                username=self.credentials["ad_user"],
+                password=self.credentials["password"],
+                tenant_id=self.credentials.get("tenant", "organizations"),
+                client_id=client_id,
+            )
 
-        elif self.credentials.get('ad_user') is not None and \
-                self.credentials.get('password') is not None and \
-                self.credentials.get('client_id') is not None and \
-                self.credentials.get('tenant') is not None:
-
+        elif (
+            self.credentials.get("ad_user") is not None
+            and self.credentials.get("password") is not None
+            and self.credentials.get("client_id") is not None
+            and self.credentials.get("tenant") is not None
+        ):
             self.azure_credentials = self.acquire_token_with_username_password(
                 self._adfs_authority_url,
                 self._cloud_environment.endpoints.active_directory_resource_id,
-                self.credentials['ad_user'],
-                self.credentials['password'],
-                self.credentials['client_id'],
-                self.credentials['tenant'])
+                self.credentials["ad_user"],
+                self.credentials["password"],
+                self.credentials["client_id"],
+                self.credentials["tenant"],
+            )
 
         else:
-            self.fail("Failed to authenticate with provided credentials. Some attributes were missing. "
-                      "Credentials must include client_id, secret and tenant or ad_user and password, or "
-                      "ad_user, password, client_id, tenant and adfs_authority_url(optional) for ADFS authentication, or "
-                      "be logged in using AzureCLI.")
+            self.fail(
+                "Failed to authenticate with provided credentials. Some attributes were missing. "
+                "Credentials must include client_id, secret and tenant or ad_user and password, or "
+                "ad_user, password, client_id, tenant and adfs_authority_url(optional) for ADFS authentication, or "
+                "be logged in using AzureCLI."
+            )
 
     @staticmethod
     def fail(msg):
@@ -228,8 +252,7 @@ class AzureCredentials(object):
             config = configparser.ConfigParser()
             config.read(path)
         except Exception as exc:
-            self.fail("Failed to access {0}. Check that the file exists and you have read "
-                      "access. {1}".format(path, str(exc)))
+            self.fail("Failed to access {0}. Check that the file exists and you have read " "access. {1}".format(path, str(exc)))
         credentials = dict()
         for key in AZURE_CREDENTIAL_ENV_MAPPING:
             try:
@@ -237,7 +260,7 @@ class AzureCredentials(object):
             except Exception:
                 pass
 
-        if credentials.get('subscription_id'):
+        if credentials.get("subscription_id"):
             return credentials
 
         return None
@@ -265,7 +288,7 @@ class AzureCredentials(object):
 
         credentials = MSIAuthentication(client_id=client_id, cloud_environment=cloud_environment)
         credential = MSIAuthenticationWrapper(client_id=client_id, cloud_environment=cloud_environment)
-        subscription_id = subscription_id or self._get_env('subscription_id')
+        subscription_id = subscription_id or self._get_env("subscription_id")
         if not subscription_id:
             try:
                 # use the first subscription of the MSI
@@ -273,34 +296,30 @@ class AzureCredentials(object):
                 subscription = next(subscription_client.subscriptions.list())
                 subscription_id = str(subscription.subscription_id)
             except Exception as exc:
-                self.fail("Failed to get MSI token: {0}. "
-                          "Please check whether your machine enabled MSI or grant access to any subscription.".format(str(exc)))
+                self.fail(
+                    "Failed to get MSI token: {0}. " "Please check whether your machine enabled MSI or grant access to any subscription.".format(str(exc))
+                )
         return {
-            'credentials': credentials,
-            'credential': credential,
-            'subscription_id': subscription_id,
-            'cloud_environment': cloud_environment,
-            'auth_source': 'msi'
+            "credentials": credentials,
+            "credential": credential,
+            "subscription_id": subscription_id,
+            "cloud_environment": cloud_environment,
+            "auth_source": "msi",
         }
 
     def _get_azure_cli_credentials(self, subscription_id=None, resource=None):
         if self.is_ad_resource:
-            resource = 'https://graph.windows.net/'
-        subscription_id = subscription_id or self._get_env('subscription_id')
+            resource = "https://graph.windows.net/"
+        subscription_id = subscription_id or self._get_env("subscription_id")
         try:
             profile = get_cli_profile()
         except Exception as exc:
             self.fail("Failed to load CLI profile {0}.".format(str(exc)))
 
-        credentials, subscription_id, tenant = profile.get_login_credentials(
-            subscription_id=subscription_id, resource=resource)
+        credentials, subscription_id, tenant = profile.get_login_credentials(subscription_id=subscription_id, resource=resource)
         cloud_environment = get_cli_active_cloud()
 
-        cli_credentials = {
-            'credentials': credentials,
-            'subscription_id': subscription_id,
-            'cloud_environment': cloud_environment
-        }
+        cli_credentials = {"credentials": credentials, "subscription_id": subscription_id, "cloud_environment": cloud_environment}
         return cli_credentials
 
     def _get_env_credentials(self):
@@ -308,11 +327,11 @@ class AzureCredentials(object):
         for attribute, env_variable in AZURE_CREDENTIAL_ENV_MAPPING.items():
             env_credentials[attribute] = os.environ.get(env_variable, None)
 
-        if env_credentials['profile']:
-            credentials = self._get_profile(env_credentials['profile'])
+        if env_credentials["profile"]:
+            credentials = self._get_profile(env_credentials["profile"])
             return credentials
 
-        if env_credentials.get('subscription_id') is not None:
+        if env_credentials.get("subscription_id") is not None:
             return env_credentials
 
         return None
@@ -324,35 +343,36 @@ class AzureCredentials(object):
         for attribute, env_variable in AZURE_CREDENTIAL_ENV_MAPPING.items():
             arg_credentials[attribute] = params.get(attribute, None)
 
-        if auth_source == 'msi':
-            return self._get_msi_credentials(subscription_id=params.get('subscription_id'), client_id=params.get('client_id'),
-                                             _cloud_environment=params.get('cloud_environment'))
+        if auth_source == "msi":
+            return self._get_msi_credentials(
+                subscription_id=params.get("subscription_id"), client_id=params.get("client_id"), _cloud_environment=params.get("cloud_environment")
+            )
 
-        if auth_source == 'cli':
+        if auth_source == "cli":
             if not HAS_AZURE_CLI_CORE:
-                self.fail(msg=missing_required_lib('azure-cli', reason='for `cli` auth_source'))
+                self.fail(msg=missing_required_lib("azure-cli", reason="for `cli` auth_source"))
             try:
-                cli_credentials = self._get_azure_cli_credentials(subscription_id=params.get('subscription_id'))
+                cli_credentials = self._get_azure_cli_credentials(subscription_id=params.get("subscription_id"))
                 return cli_credentials
             except CLIError as err:
                 self.fail("Azure CLI profile cannot be loaded - {0}".format(err))
 
-        if auth_source == 'env':
+        if auth_source == "env":
             env_credentials = self._get_env_credentials()
             return env_credentials
 
-        if auth_source == 'credential_file':
-            profile = params.get('profile') or 'default'
+        if auth_source == "credential_file":
+            profile = params.get("profile") or "default"
             default_credentials = self._get_profile(profile)
             return default_credentials
 
         # auto, precedence: module parameters -> environment variables -> default profile in ~/.azure/credentials -> azure cli
         # try module params
-        if arg_credentials['profile'] is not None:
-            credentials = self._get_profile(arg_credentials['profile'])
+        if arg_credentials["profile"] is not None:
+            credentials = self._get_profile(arg_credentials["profile"])
             return credentials
 
-        if arg_credentials['client_id'] or arg_credentials['ad_user']:
+        if arg_credentials["client_id"] or arg_credentials["ad_user"]:
             return arg_credentials
 
         # try environment
@@ -366,7 +386,7 @@ class AzureCredentials(object):
             return default_credentials
 
         if HAS_AZURE_CLI_CORE:
-            cli_credentials = self._get_azure_cli_credentials(subscription_id=params.get('subscription_id'))
+            cli_credentials = self._get_azure_cli_credentials(subscription_id=params.get("subscription_id"))
             return cli_credentials
 
         return None
@@ -375,7 +395,7 @@ class AzureCredentials(object):
         authority_uri = authority
 
         if tenant is not None:
-            authority_uri = authority + '/' + tenant
+            authority_uri = authority + "/" + tenant
 
         context = AuthenticationContext(authority_uri)
         token_response = context.acquire_token_with_username_password(resource, username, password, client_id)
@@ -386,11 +406,11 @@ class AzureCredentials(object):
         authority_uri = authority
 
         if tenant is not None:
-            authority_uri = authority + '/' + tenant
+            authority_uri = authority + "/" + tenant
 
         context = AuthenticationContext(authority_uri)
         x509_certificate = None
-        with open(x509_certificate_path, 'rb') as pem_file:
+        with open(x509_certificate_path, "rb") as pem_file:
             x509_certificate = pem_file.read()
         token_response = context.acquire_token_with_client_certificate(resource, client_id, x509_certificate, thumbprint)
 
