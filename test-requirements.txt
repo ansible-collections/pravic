@@ -5,3 +5,4 @@ pytest-forked
 pytest-xdist
 pytest-mock
 coverage
+graphlib
