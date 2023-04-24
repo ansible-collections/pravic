@@ -43,7 +43,7 @@ try:
     from adal.authentication_context import AuthenticationContext
     from azure.identity._credentials import client_secret, user_password, certificate
 
-except ImportError as exc:
+except ImportError:
     Authentication = object
     HAS_AZURE_EXC = traceback.format_exc()
     HAS_AZURE = False
