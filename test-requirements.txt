@@ -5,5 +5,4 @@ pytest-forked
 pytest-xdist
 pytest-mock
 coverage
-graphlib
 pytest-ansible-units ; python_version > '3.8'
