@@ -11,6 +11,7 @@ on:
       - labeled
       - unlabeled
       - synchronize
+      - closed
     branches:
       - main
       - stable-*
