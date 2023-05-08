@@ -131,7 +131,7 @@ If you do not want to define the resources in a separate YAML file, you can also
               BucketName: ansible-declared-state-03
 ```
 
-This collection is tested using GitHub Actions. To know more about CI, refer to [CI.md]https://github.com/ansible-collections/pravic/blob/main/CI.md).
+This collection is tested using GitHub Actions. To know more about CI, refer to [CI.md]https://github.com/ansible-collections/pravic/blob/main/CI.md].
 
 ## Release notes
 
