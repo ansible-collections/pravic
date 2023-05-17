@@ -5,4 +5,4 @@ pytest-forked
 pytest-xdist
 pytest-mock
 coverage
-pytest-ansible-units ; python_version > '3.8'
+pytest-ansible
