@@ -1,4 +1,4 @@
-name: integration
+name: CI
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -37,19 +37,19 @@ jobs:
 
       - name: Build and install collection
         id: install-collection
-        uses: abikouo/github_actions/.github/actions/build_install_collection@build_install_collection
+        uses: ansible-network/github_actions/.github/actions/build_install_collection@main
         with:
           install_python_dependencies: true
           source_path: ${{ env.source }}
 
       - name: Create AWS/sts session credentials
-        uses: abikouo/github_actions/.github/actions/ansible_aws_test_provider@ansible_test_integration_a
+        uses: ansible-network/github_actions/.github/actions/ansible_aws_test_provider@main
         with:
           collection_path: ${{ steps.install-collection.outputs.collection_path }}
           ansible_core_ci_key: ${{ secrets.ANSIBLE_CORE_CI_KEY }}
 
       - name: Run integration tests
-        uses: abikouo/github_actions/.github/actions/ansible_test_integration@ansible_test_integration_a
+        uses: ansible-network/github_actions/.github/actions/ansible_test_integration@main
         with:
           collection_path: ${{ steps.install-collection.outputs.collection_path }}
           python_version: ${{ matrix.python-version }}
